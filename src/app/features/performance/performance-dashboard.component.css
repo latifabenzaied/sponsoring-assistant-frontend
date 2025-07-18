@@ -1,0 +1,78 @@
+/* Performance dashboard component styles */
+
+/* Table hover effects */
+tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Card hover effects */
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Status badge animations */
+.inline-flex {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Platform icon spacing */
+.platform-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Responsive table scrolling */
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f3f4f6;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Card grid responsive adjustments */
+@media (max-width: 768px) {
+  .grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Filter section responsive layout */
+@media (max-width: 1024px) {
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-5 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-5 {
+    grid-template-columns: 1fr;
+  }
+}

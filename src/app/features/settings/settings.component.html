@@ -1,0 +1,182 @@
+<div class="min-h-screen bg-gray-50 py-6">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Settings</h1>
+      <p class="mt-2 text-gray-600">Manage your account settings and preferences</p>
+    </div>
+
+    <div class="space-y-8">
+      <!-- Profile Settings -->
+      <div class="card p-6 animate-fade-in">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="form-label">Full Name</label>
+            <input 
+              type="text" 
+              class="form-input" 
+              [(ngModel)]="settings.profile.name"
+            />
+          </div>
+          
+          <div>
+            <label class="form-label">Email Address</label>
+            <input 
+              type="email" 
+              class="form-input" 
+              [(ngModel)]="settings.profile.email"
+            />
+          </div>
+          
+          <div>
+            <label class="form-label">Company</label>
+            <input 
+              type="text" 
+              class="form-input" 
+              [(ngModel)]="settings.profile.company"
+            />
+          </div>
+          
+          <div>
+            <label class="form-label">Phone Number</label>
+            <input 
+              type="tel" 
+              class="form-input" 
+              [(ngModel)]="settings.profile.phone"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Notification Settings -->
+      <div class="card p-6 animate-slide-up">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Notifications</h2>
+        
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">Email Notifications</h3>
+              <p class="text-sm text-gray-500">Receive notifications via email</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                class="sr-only peer" 
+                [(ngModel)]="settings.notifications.emailNotifications"
+              />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">Push Notifications</h3>
+              <p class="text-sm text-gray-500">Receive push notifications in your browser</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                class="sr-only peer" 
+                [(ngModel)]="settings.notifications.pushNotifications"
+              />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">Campaign Alerts</h3>
+              <p class="text-sm text-gray-500">Get notified about campaign performance</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                class="sr-only peer" 
+                [(ngModel)]="settings.notifications.campaignAlerts"
+              />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">Weekly Reports</h3>
+              <p class="text-sm text-gray-500">Receive weekly performance summaries</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                class="sr-only peer" 
+                [(ngModel)]="settings.notifications.weeklyReports"
+              />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preferences -->
+      <div class="card p-6 animate-slide-up">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Preferences</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="form-label">Currency</label>
+            <select class="form-input" [(ngModel)]="settings.preferences.currency">
+              <option *ngFor="let currency of currencies" [value]="currency.value">
+                {{ currency.label }}
+              </option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="form-label">Language</label>
+            <select class="form-input" [(ngModel)]="settings.preferences.language">
+              <option *ngFor="let language of languages" [value]="language.value">
+                {{ language.label }}
+              </option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="form-label">Timezone</label>
+            <select class="form-input" [(ngModel)]="settings.preferences.timezone">
+              <option *ngFor="let timezone of timezones" [value]="timezone.value">
+                {{ timezone.label }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="flex items-center">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                [(ngModel)]="settings.preferences.autoSave"
+              />
+              <span class="text-sm text-gray-700">Auto-save changes</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end space-x-4">
+        <button 
+          (click)="resetSettings()"
+          class="btn-secondary"
+        >
+          Reset to Default
+        </button>
+        <button 
+          (click)="saveSettings()"
+          class="btn-primary"
+        >
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

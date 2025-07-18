@@ -1,0 +1,124 @@
+<div class="min-h-screen bg-gray-50 py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">AI Suggestions</h1>
+      <p class="mt-2 text-gray-600">Optimize your listings and campaigns with AI-powered recommendations</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="card p-6 mb-8 animate-fade-in">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+        <div class="flex items-center space-x-4">
+          <label class="text-sm font-medium text-gray-700">Filter by:</label>
+          <select 
+            [(ngModel)]="filterBy"
+            class="form-input w-auto"
+          >
+            <option value="all">All Suggestions</option>
+            <option value="listing">Listing Suggestions</option>
+            <option value="campaign">Campaign Suggestions</option>
+          </select>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <label class="text-sm font-medium text-gray-700">Sort by:</label>
+          <select 
+            [(ngModel)]="sortBy"
+            class="form-input w-auto"
+          >
+            <option value="priority">Priority</option>
+            <option value="type">Type</option>
+            <option value="recent">Most Recent</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Suggestions Grid -->
+    <div class="space-y-6">
+      <div 
+        *ngFor="let suggestion of filteredSuggestions; trackBy: trackBySuggestion"
+        class="card p-6 animate-slide-up hover:shadow-lg transition-shadow duration-200"
+      >
+        <div class="flex items-start space-x-4">
+          <!-- Icon -->
+          <div class="flex-shrink-0">
+            <div 
+              class="w-12 h-12 rounded-lg flex items-center justify-center"
+              [class]="suggestion.category === 'improvement' ? 'bg-blue-100' : 
+                       suggestion.category === 'optimization' ? 'bg-green-100' :
+                       suggestion.category === 'warning' ? 'bg-red-100' : 'bg-yellow-100'"
+            >
+              <span 
+                [innerHTML]="getCategoryIcon(suggestion.category)"
+                [class]="suggestion.category === 'improvement' ? 'text-blue-600' : 
+                         suggestion.category === 'optimization' ? 'text-green-600' :
+                         suggestion.category === 'warning' ? 'text-red-600' : 'text-yellow-600'"
+              ></span>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="flex-1">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-lg font-semibold text-gray-900">{{ suggestion.title }}</h3>
+              <div class="flex items-center space-x-2">
+                <!-- Priority Badge -->
+                <span 
+                  class="px-2 py-1 text-xs font-medium rounded-full"
+                  [class]="getPriorityColor(suggestion.priority)"
+                >
+                  {{ suggestion.priority | titlecase }}
+                </span>
+                
+                <!-- Type Badge -->
+                <span 
+                  class="px-2 py-1 text-xs font-medium rounded-full"
+                  [class.bg-purple-100]="suggestion.type === 'listing'"
+                  [class.text-purple-800]="suggestion.type === 'listing'"
+                  [class.bg-indigo-100]="suggestion.type === 'campaign'"
+                  [class.text-indigo-800]="suggestion.type === 'campaign'"
+                >
+                  {{ suggestion.type | titlecase }}
+                </span>
+              </div>
+            </div>
+            
+            <p class="text-gray-600 mb-4">{{ suggestion.description }}</p>
+            
+            <!-- Actions -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <button 
+                  *ngIf="suggestion.actionable"
+                  class="btn-primary text-sm"
+                >
+                  Apply Suggestion
+                </button>
+                <button class="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors">
+                  Dismiss
+                </button>
+              </div>
+              
+              <button class="text-primary-600 hover:text-primary-700 text-sm font-medium transition-colors">
+                Learn More →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredSuggestions.length === 0" class="text-center py-12">
+      <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No suggestions found</h3>
+      <p class="text-gray-500">Try adjusting your filters or check back later for new recommendations.</p>
+    </div>
+  </div>
+</div>
