@@ -14,17 +14,18 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
                             <label class="form-label">Title *</label>
-                            <input type="text" class="form-input" formControlName="title" placeholder="Beautiful apartment in downtown" />
+                            <input type="text" class="form-input" formControlName="title" placeholder="Beautiful apartment in downtown" (blur)="onFieldBlur('title')" />
                         </div>
 
                         <div class="md:col-span-2">
                             <label class="form-label">Description *</label>
-                            <textarea class="form-input" rows="4" formControlName="description" placeholder="Describe the property..."></textarea>
+                            <textarea class="form-input" rows="4" formControlName="description" placeholder="Describe the property..."   (blur)="onFieldBlur('description')"></textarea>
                         </div>
+
 
                         <div>
                             <label class="form-label">Property Type *</label>
-                            <select class="form-input" formControlName="propertyType">
+                            <select class="form-input" formControlName="propertyType" (blur)="onFieldBlur('propertyType')">
                                 <option value="">Select type</option>
                                 <option value="APARTMENT">Apartment</option>
                                 <option value="HOUSE">House</option>
@@ -36,7 +37,7 @@
 
                         <div>
                             <label class="form-label">Listing Type *</label>
-                            <select class="form-input" formControlName="type">
+                            <select class="form-input" formControlName="type" (blur)="onFieldBlur('type')">
                                 <option value="">Select type</option>
                                 <option value="SALE">For Sale</option>
                                 <option value="RENT">For Rent</option>
@@ -45,22 +46,22 @@
 
                         <div>
                             <label class="form-label">Price (€) *</label>
-                            <input type="number" class="form-input" formControlName="price" placeholder="250000" />
+                            <input type="number" class="form-input" formControlName="price" placeholder="250000" (blur)="onFieldBlur('price')" />
                         </div>
 
                         <div>
                             <label class="form-label">Area (m²) *</label>
-                            <input type="number" class="form-input" formControlName="area" placeholder="85" />
+                            <input type="number" class="form-input" formControlName="area" placeholder="85" (blur)="onFieldBlur('area')" />
                         </div>
 
                         <div>
                             <label class="form-label">Bedrooms</label>
-                            <input type="number" class="form-input" formControlName="bedRoomsNb" placeholder="3" />
+                            <input type="number" class="form-input" formControlName="bedRoomsNb" placeholder="3" (blur)="onFieldBlur('bedRoomsNb')" />
                         </div>
 
                         <div>
                             <label class="form-label">Bathrooms</label>
-                            <input type="number" class="form-input" formControlName="bathRoomsNb" placeholder="2" />
+                            <input type="number" class="form-input" formControlName="bathRoomsNb" placeholder="2" (blur)="onFieldBlur('bathRoomsNb')" />
                         </div>
                     </div>
                 </div>
@@ -71,12 +72,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
                             <label class="form-label">Location *</label>
-                            <input type="text" class="form-input" formControlName="location" placeholder="123 Main Street, Paris, 75001" />
+                            <input type="text" class="form-input" formControlName="location" placeholder="123 Main Street, Paris, 75001" (blur)="onFieldBlur('location')"/>
                         </div>
 
                         <div>
                             <label class="form-label">Availability</label>
-                            <input type="text" class="form-input" formControlName="availability" placeholder="Immediately / From March 2024" />
+                            <input type="text" class="form-input" formControlName="availability" placeholder="Immediately / From March 2024" (blur)="onFieldBlur('availability')" />
                         </div>
 
                         <div>
@@ -92,14 +93,14 @@
 
                         <div class="md:col-span-2">
                             <label class="flex items-center space-x-2 cursor-pointer">
-                                <input type="checkbox" class="rounded border-gray-300 text-primary-600" formControlName="furnished" />
+                                <input type="checkbox" class="rounded border-gray-300 text-primary-600" formControlName="furnished" (blur)="onFieldBlur('furnished')"/>
                                 <span class="text-sm text-gray-700">Furnished</span>
                             </label>
                         </div>
 
                         <div class="md:col-span-2">
                             <label class="flex items-center space-x-2 cursor-pointer">
-                                <input type="checkbox" class="rounded border-gray-300 text-primary-600" formControlName="isSponsored" />
+                                <input type="checkbox" class="rounded border-gray-300 text-primary-600" formControlName="isSponsored"  />
                                 <span class="text-sm text-gray-700">Mark as sponsored</span>
                             </label>
                         </div>
@@ -150,7 +151,11 @@
             <!-- AI Suggestions Sidebar -->
             <div class="lg:col-span-1">
                 <div class="sticky top-6">
-                    <app-ai-suggestions></app-ai-suggestions>
+                    <app-ai-suggestions
+                            [suggestions]="suggestions"
+                            [imageSuggestions]="imageSuggestions"
+                            (suggestionApplied)="onSuggestionApplied($event)"
+                    ></app-ai-suggestions>
                 </div>
             </div>
         </div>

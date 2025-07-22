@@ -9,50 +9,43 @@
     </div>
     <div class="ml-3">
       <h3 class="text-lg font-medium text-gray-900">AI Suggestions</h3>
-      <p class="text-sm text-gray-500">Optimize your {{ suggestionType }} with AI-powered recommendations</p>
+      <p class="text-sm text-gray-500">Optimize your  with AI-powered recommendations</p>
     </div>
   </div>
 
-  <div class="space-y-3" *ngIf="suggestions.length > 0; else noSuggestions">
-    <div 
-      *ngFor="let suggestion of suggestions; trackBy: trackBySuggestion"
-      class="ai-suggestion"
-      [class.border-red-200]="suggestion.priority === 'high'"
-      [class.border-yellow-200]="suggestion.priority === 'medium'"
-      [class.border-green-200]="suggestion.priority === 'low'"
-    >
-      <div class="flex items-start">
-        <div class="flex-shrink-0 mt-0.5">
-          <div 
-            class="w-5 h-5 rounded-full flex items-center justify-center"
-            [class.bg-red-100]="suggestion.priority === 'high'"
-            [class.bg-yellow-100]="suggestion.priority === 'medium'"
-            [class.bg-green-100]="suggestion.priority === 'low'"
-          >
-            <span 
-              class="text-xs font-medium"
-              [class.text-red-600]="suggestion.priority === 'high'"
-              [class.text-yellow-600]="suggestion.priority === 'medium'"
-              [class.text-green-600]="suggestion.priority === 'low'"
-            >
-              {{ suggestion.priority.charAt(0).toUpperCase() }}
-            </span>
-          </div>
-        </div>
-        <div class="ml-3 flex-1">
-          <h4 class="text-sm font-medium text-blue-900">{{ suggestion.title }}</h4>
-          <p class="text-sm text-blue-700 mt-1">{{ suggestion.description }}</p>
-          <button 
-            *ngIf="suggestion.actionable"
-            class="mt-2 text-xs font-medium text-blue-600 hover:text-blue-500 transition-colors"
-          >
-            Apply suggestion →
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+    <div class="space-y-3" *ngIf="getAllSuggestionKeys().length > 0; else noSuggestions">
+        <div
+                *ngFor="let field of getAllSuggestionKeys()"
+                class="ai-suggestion border border-blue-200 p-3 rounded-md"
+        >
+            <div class="flex items-start">
+                <div class="flex-shrink-0 mt-0.5">
+                    <div class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center">
+          <span class="text-xs font-medium text-blue-600">
+            {{ field.startsWith('image:') ? '🖼️' : field.charAt(0).toUpperCase() }}
+          </span>
+                    </div>
+                </div>
+                <div class="ml-3 flex-1">
+                    <h4 class="text-sm font-medium text-blue-900">
+                        {{ field.startsWith('image:') ? field.replace('image:', '') + ' (Image)' : field | titlecase }}
+                    </h4>
 
+                    <p class="text-sm text-blue-700 mt-1">
+                        {{ getExplanation(getAllSuggestions()[field]) }}
+                    </p>
+
+                    <button
+                            *ngIf="!field.startsWith('image:')"
+                            class="mt-2 text-xs font-medium text-blue-600 hover:text-blue-500 transition-colors"
+                            (click)="applySuggestion(field)"
+                    >
+                        Apply suggestion →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
   <ng-template #noSuggestions>
     <div class="text-center py-8">
       <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">

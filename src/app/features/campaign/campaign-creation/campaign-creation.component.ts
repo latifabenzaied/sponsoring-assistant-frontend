@@ -119,6 +119,7 @@ export class CampaignCreationComponent implements OnInit {
       const res = await this.sitePostService.getSitePostById(id).toPromise();
       if (res) {
         this.sitePost=res;
+        console.log(this.sitePost);
         console.log('Responses loaded:', this.sitePost);
       }
     } catch (error) {

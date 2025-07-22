@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -9,8 +9,10 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './ai-suggestions-page.component.html',
   styleUrls: ['./ai-suggestions-page.component.css']
 })
-export class AiSuggestionsPageComponent {
-  suggestions = [
+export class AiSuggestionsPageComponent{
+
+
+  suggestion = [
     {
       id: '1',
       type: 'listing',
@@ -53,19 +55,19 @@ export class AiSuggestionsPageComponent {
   sortBy: 'priority' | 'type' | 'recent' = 'priority';
 
   get filteredSuggestions() {
-    let filtered = this.suggestions;
-    
-    if (this.filterBy !== 'all') {
-      filtered = filtered.filter(s => s.type === this.filterBy);
-    }
-    
-    return filtered.sort((a, b) => {
-      if (this.sortBy === 'priority') {
-        const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
-        return priorityOrder[b.priority as keyof typeof priorityOrder] - priorityOrder[a.priority as keyof typeof priorityOrder];
-      }
+    // let filtered = this.suggestions;
+    //
+    // if (this.filterBy !== 'all') {
+    //   // filtered = filtered.filter(s => s.type === this.filterBy);
+    // }
+    //
+    // // return filtered.sort((a, b) => {
+    // //   if (this.sortBy === 'priority') {
+    // //     const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+    // //     return priorityOrder[b.priority as keyof typeof priorityOrder] - priorityOrder[a.priority as keyof typeof priorityOrder];
+    // //   }
       return 0;
-    });
+    // // });
   }
 
   getPriorityColor(priority: string) {
