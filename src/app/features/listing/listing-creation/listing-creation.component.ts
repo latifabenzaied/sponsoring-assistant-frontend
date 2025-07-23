@@ -114,26 +114,41 @@ export class ListingCreationComponent implements OnInit {
         }
     }
 
-
-    removePhoto(index: number) {
-        this.images.splice(index, 1);
+    getImageSuggestionKey(file: File): string {
+        return `image:${file.name}`;
     }
+    removePhoto(index: number): void {
+        const file = this.images[index];
+        const keyToRemove = this.getImageSuggestionKey(file);
+        if (keyToRemove in this.imageSuggestions) {
+            const { [keyToRemove]: _, ...updated } = this.imageSuggestions;
+            this.imageSuggestions = { ...updated }; // force déclenchement de ngOnChanges
+            console.log('✅ Suggestion supprimée pour :', keyToRemove);
+        } else {
+            console.warn('❌ Clé non trouvée :', keyToRemove);
+        }
+
+        this.images.splice(index, 1);
+        this.imagePreviews.splice(index, 1);
+    }
+
 
     submitForm() {
         if (this.listingForm.valid) {
             this.sitePostService.addSitePost(this.listingForm.value, this.images).subscribe({
                     next: (response) => {
                         const sitePost = response as SitePost;
-                        this.listingForm.reset();
-                        console.log(response);
+                        console.log(sitePost.idSitePost);
                         this.router.navigate(['/campaign', sitePost.idSitePost]);
+                        this.listingForm.reset();
                     },
                     error: (err) => {
-                        console.error("Error submitting complaint:", err);
+                        console.error("Error submitting :", err);
                     }
                 }
             )
         } else {
+            console.log('error submitting form:', JSON.stringify(this.listingForm.value));
             this.listingForm.markAllAsTouched();
         }
     }

@@ -33,6 +33,12 @@ export class AiSuggestionsComponent implements OnInit,OnChanges  {
       console.log("hihihihi");
       console.log('🧠 Nouvelles suggestions reçues :', changes['suggestions'].currentValue);
     }
+    if (changes['imageSuggestions']) {
+      console.log('🖼️ imageSuggestions updated:', changes['imageSuggestions'].currentValue);
+console.log(this.imageSuggestions)
+
+    }
+
     this.loadSuggestions();
   }
 
@@ -73,7 +79,9 @@ export class AiSuggestionsComponent implements OnInit,OnChanges  {
     // console.log(this.getSuggestion(this.suggestions[field]));
     // this.appliedSuggestions[field] = true;
     const value = this.getSuggestion(this.suggestions[field]);
-
+    setTimeout(() => {
+      delete this.suggestions[field];
+    }, 300); //
     this.suggestionApplied.emit({ field, value });
   }
   private loadSuggestions() {

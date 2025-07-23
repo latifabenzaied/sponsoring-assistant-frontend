@@ -9,7 +9,7 @@ export class AiSocketService {
     private socket$: WebSocketSubject<any>;
 
     constructor() {
-        this.socket$ = webSocket('ws://localhost:8081/ws/suggestions');
+        this.socket$ = webSocket('ws://localhost:8001/ws/suggestions');
         this.socket$.subscribe({
             next: (msg) => console.log('Message from server:', msg),
             error: (err) => console.error('WebSocket error:', err),

@@ -24,8 +24,8 @@
             <div class="flex items-start space-x-4">
               <div class="flex-shrink-0">
                 <img 
-                  [src]="listing.photoUrls[0] || 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop'"
-                  [alt]="listing.title"
+                  [src]=" 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop'"
+                  [alt]=""
                   class="w-16 h-16 rounded-lg object-cover"
                 />
               </div>
@@ -33,7 +33,7 @@
                 <h3 class="text-lg font-medium text-gray-900">{{sitePost.title }}</h3>
                 <p class="text-sm text-gray-600">{{ sitePost.location}}</p>
                 <div class="flex items-center space-x-4 mt-1">
-                  <span class="text-lg font-semibold text-primary-600">€</span>
+                  <span class="text-lg font-semibold text-primary-600">{{ sitePost.price}}€</span>
                   <span class="text-sm text-gray-500">{{ sitePost.area }}m²</span>
                 </div>
               </div>
@@ -143,14 +143,14 @@
             <!-- Facebook Image -->
             <div class="relative">
               <img 
-                [src]="listing.photoUrls[0] || 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=500&h=300&fit=crop'"
-                [alt]="listing.title"
+                [src]=" 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=500&h=300&fit=crop'"
+                [alt]=""
                 class="w-full h-48 object-cover"
               />
               <div class="absolute bottom-0 left-0 right-0 bg-white bg-opacity-95 p-3 border-t border-gray-200">
-                <p class="text-xs text-gray-500 uppercase tracking-wide">{{ listing.location }}</p>
-                <p class="font-semibold text-sm text-gray-900">{{ listing.title }}</p>
-                <p class="text-lg font-bold text-primary-600">€{{ listing.price | number }}</p>
+                <p class="text-xs text-gray-500 uppercase tracking-wide">{{ sitePost.location }}</p>
+                <p class="font-semibold text-sm text-gray-900">{{ sitePost.title }}</p>
+                <p class="text-lg font-bold text-primary-600">€{{ sitePost.price | number }}</p>
               </div>
             </div>
 
@@ -224,7 +224,7 @@
                     <span class="font-semibold text-sm text-gray-900">homefinder_ads</span>
                     <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Sponsored</span>
                   </div>
-                  <span class="text-xs text-gray-500">{{ listing.location }}</span>
+                  <span class="text-xs text-gray-500">{{ sitePost.location }}</span>
                 </div>
                 <button class="text-gray-400">
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -239,8 +239,8 @@
               <!-- Single Image -->
               <div *ngIf="selectedInstagramFormat === 'single-image'">
                 <img 
-                  [src]="listing.photoUrls[0] || 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop'"
-                  [alt]="listing.title"
+                  [src]="'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop'"
+                  [alt]="sitePost.title"
                   class="w-full h-64 object-cover"
                 />
               </div>
@@ -248,12 +248,12 @@
               <!-- Carousel -->
               <div *ngIf="selectedInstagramFormat === 'carousel'" class="relative">
                 <img 
-                  [src]="listing.photoUrls[currentCarouselIndex] || 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop'"
-                  [alt]="listing.title"
+                  [src]="'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop'"
+                  [alt]="sitePost.title"
                   class="w-full h-64 object-cover"
                 />
                 <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                  {{ currentCarouselIndex + 1 }}/{{ Math.max(listing.photoUrls.length, 3) }}
+                  {{ currentCarouselIndex + 1 }}/{{ Math.max(sitePost.photoUrls.length, 3) }}
                 </div>
                 <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
                   <div 
@@ -337,7 +337,7 @@
               
               <div class="flex items-center justify-between py-2 border-b border-gray-100">
                 <span class="text-sm text-gray-600">Total Budget</span>
-                <span class="text-sm font-medium text-gray-900">€{{ campaign.budget || 700 }}</span>
+                <span class="text-sm font-medium text-gray-900">€{{234}}</span>
               </div>
               
               <div class="flex items-center justify-between py-2 border-b border-gray-100">
@@ -375,7 +375,7 @@
           <!-- AI Suggestions -->
           <app-ai-suggestions 
             suggestionType="campaign" 
-            [listingData]="listing"
+            [listingData]="sitePost"
             [campaignData]="campaign"
           ></app-ai-suggestions>
         </div>

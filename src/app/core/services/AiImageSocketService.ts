@@ -22,7 +22,7 @@ export class AiImageSocketService {
         this.socket$.subscribe({
             next: (msg: ImageAnalysisMessage) => {
                 console.log('📩 Message reçu du serveur:', msg);
-                this.messageSubject.next(msg); // ✅ relaye le message au composant
+                this.messageSubject.next(msg); //
             },
             error: (err) => console.error('❌ WebSocket error:', err),
             complete: () => console.warn('⚠️ WebSocket closed'),
