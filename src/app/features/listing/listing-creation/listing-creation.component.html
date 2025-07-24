@@ -17,10 +17,10 @@
                             <input type="text" class="form-input" formControlName="title" placeholder="Beautiful apartment in downtown" (blur)="onFieldBlur('title')" />
                         </div>
 
-                        <div class="md:col-span-2">
+                       <!-- <div class="md:col-span-2">
                             <label class="form-label">Description *</label>
                             <textarea class="form-input" rows="4" formControlName="description" placeholder="Describe the property..."   (blur)="onFieldBlur('description')"></textarea>
-                        </div>
+                        </div>-->
 
 
                         <div>
@@ -64,6 +64,13 @@
                             <input type="number" class="form-input" formControlName="bathRoomsNb" placeholder="2" (blur)="onFieldBlur('bathRoomsNb')" />
                         </div>
                     </div>
+                </div>
+
+                <div class="card p-6 animate-fade-in">
+                <div class="md:col-span-2">
+                    <label class="form-label">Description *</label>
+                    <textarea class="form-input" rows="4" formControlName="description" placeholder="Describe the property..."   (blur)="onFieldBlur('description')"></textarea>
+                </div>
                 </div>
 
                 <!-- Location & Details -->

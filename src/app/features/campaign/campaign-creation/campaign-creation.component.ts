@@ -21,12 +21,15 @@ export class CampaignCreationComponent implements OnInit {
     Math = Math;
     sitePostId !: number;
     sitePost!: SitePost;
-
+    private baseUrl = 'http://localhost:9091/api/v1';
     instagramFormats = [
         {value: 'single-image', label: 'Single Image'},
         {value: 'carousel', label: 'Carousel'},
         {value: 'single-video', label: 'Single Video'}
     ];
+
+    selectedFacebookImage = 0; // Index de l'image sélectionnée pour Facebook
+    selectedInstagramImage = 0; // Index de l'image sélectionnée pour Instagram
 
     constructor(private router: Router,
                 private sitePostService: SitePostService,
@@ -120,11 +123,55 @@ export class CampaignCreationComponent implements OnInit {
             const res = await this.sitePostService.getSitePostById(id).toPromise();
             if (res) {
                 this.sitePost = res;
-                console.log(res.photoUrls.length, res.photoUrls[0]);
+                console.log(res.photoUrls);
                 console.log('Responses loaded:', this.sitePost);
+                const fileName = res.photoUrls[0].split('/').pop();
+                /* console.log(this.getImageUrl(fileName));*/
+
             }
         } catch (error) {
             console.error('Error fetching responses:', error);
         }
+    }
+    getImageUrl(imageName: any): string {
+
+        console.log(imageName);
+        if (!imageName) {
+            return 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=500&h=300&fit=crop\'';
+        }
+        const fileName = imageName.split('/').pop();
+
+        return `${this.baseUrl}/images/${fileName}`;
+    }
+
+
+    // Méthodes pour la sélection d'images
+    selectFacebookImage(index: number) {
+        this.selectedFacebookImage = index;
+    }
+
+    selectInstagramImage(index: number) {
+        this.selectedInstagramImage = index;
+    }
+
+    getFacebookPreviewImage(): string {
+        if (this.sitePost && this.sitePost.photoUrls && this.sitePost.photoUrls.length > 0) {
+            return this.getImageUrl(this.sitePost.photoUrls[this.selectedFacebookImage]);
+        }
+        return '';
+    }
+
+    getInstagramPreviewImage(): string {
+        if (this.sitePost && this.sitePost.photoUrls && this.sitePost.photoUrls.length > 0) {
+            if (this.selectedInstagramFormat === 'carousel') {
+                return this.getImageUrl(this.sitePost.photoUrls[this.currentCarouselIndex]);
+            }
+            return this.getImageUrl(this.sitePost.photoUrls[this.selectedInstagramImage]);
+        }
+        return '';
+    }
+
+    hasMultipleImages(): boolean {
+        return this.sitePost && this.sitePost.photoUrls && this.sitePost.photoUrls.length > 1;
     }
 }
