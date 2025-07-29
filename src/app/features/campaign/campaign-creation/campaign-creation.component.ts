@@ -1,16 +1,18 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Campaign, SitePost} from '../../../core/models/listing.interface';
 import {AiSuggestionsComponent} from '../../../shared/components/ai-suggestions/ai-suggestions.component';
 import {SitePostService} from "../../../core/services/SitePostService";
 import {Observable} from "rxjs";
+import {MetaCampaign} from "../../../core/models/MetaCampaign";
+import {MetaApiService} from "../../../core/services/MetaCampaignService";
 
 @Component({
     selector: 'app-campaign-creation',
     standalone: true,
-    imports: [CommonModule, FormsModule, AiSuggestionsComponent],
+    imports: [CommonModule, FormsModule, AiSuggestionsComponent, ReactiveFormsModule],
     templateUrl: './campaign-creation.component.html'
 })
 export class CampaignCreationComponent implements OnInit {
@@ -27,13 +29,14 @@ export class CampaignCreationComponent implements OnInit {
         {value: 'carousel', label: 'Carousel'},
         {value: 'single-video', label: 'Single Video'}
     ];
+    campaignForm!: FormGroup;
 
-    selectedFacebookImage = 0; // Index de l'image sélectionnée pour Facebook
-    selectedInstagramImage = 0; // Index de l'image sélectionnée pour Instagram
 
     constructor(private router: Router,
                 private sitePostService: SitePostService,
-                private actR: ActivatedRoute,) {
+                private actR: ActivatedRoute,
+                private fb: FormBuilder,
+                private metaApi: MetaApiService) {
     }
 
     campaign: Campaign = {
@@ -66,19 +69,19 @@ export class CampaignCreationComponent implements OnInit {
           this.router.navigate(['/listing']);
            return;
          }*/
+        this.campaignForm = this.fb.group({
+            name: ['', Validators.required],
+            budget: [null, [Validators.required, Validators.min(1)]],
+            duration: [null, [Validators.required, Validators.min(1)]],
+            startDate: ['', Validators.required],
+            endDate: ['', Validators.required],
+        });
 
         this.actR.params.subscribe(async (params) => {
                 this.sitePostId = params['id'];
             }
         )
 
-        /*  if (this.sitePost) {
-              this.listing = this.sitePost;
-
-              this.campaign.listingId = this.listing.idSitePost?.toString() || '';
-              this.campaign.name = `Campaign - ${this.listing.title}`;
-              this.campaign.targeting.location.center = `${this.listing.location}`;
-          }*/
         setInterval(() => {
             if (this.selectedInstagramFormat === 'carousel') {
                 this.currentCarouselIndex = (this.currentCarouselIndex + 1) % Math.max(this.listing.photoUrls.length, 3);
@@ -98,13 +101,13 @@ export class CampaignCreationComponent implements OnInit {
     }
 
     getCampaignDuration(): string {
-       /* if (this.campaign.startDate && this.campaign.endDate) {
-            const start = new Date(this.campaign.startDate);
-            const end = new Date(this.campaign.endDate);
-            const startStr = start.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
-            const endStr = end.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
-            return `${startStr} – ${endStr}`;
-        }*/
+        /* if (this.campaign.startDate && this.campaign.endDate) {
+             const start = new Date(this.campaign.startDate);
+             const end = new Date(this.campaign.endDate);
+             const startStr = start.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+             const endStr = end.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+             return `${startStr} – ${endStr}`;
+         }*/
         return ` days`;
     }
 
@@ -123,19 +126,15 @@ export class CampaignCreationComponent implements OnInit {
             const res = await this.sitePostService.getSitePostById(id).toPromise();
             if (res) {
                 this.sitePost = res;
-                console.log(res.photoUrls);
-                console.log('Responses loaded:', this.sitePost);
                 const fileName = res.photoUrls[0].split('/').pop();
-                /* console.log(this.getImageUrl(fileName));*/
-
             }
         } catch (error) {
             console.error('Error fetching responses:', error);
         }
     }
+
     getImageUrl(imageName: any): string {
 
-        console.log(imageName);
         if (!imageName) {
             return 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=500&h=300&fit=crop\'';
         }
@@ -145,33 +144,26 @@ export class CampaignCreationComponent implements OnInit {
     }
 
 
-    // Méthodes pour la sélection d'images
-    selectFacebookImage(index: number) {
-        this.selectedFacebookImage = index;
-    }
-
-    selectInstagramImage(index: number) {
-        this.selectedInstagramImage = index;
-    }
-
-    getFacebookPreviewImage(): string {
-        if (this.sitePost && this.sitePost.photoUrls && this.sitePost.photoUrls.length > 0) {
-            return this.getImageUrl(this.sitePost.photoUrls[this.selectedFacebookImage]);
+    onSubmit(): void {
+        if (this.campaignForm.valid) {
+            const formData = this.campaignForm.value;
+            console.log('Formulaire soumis :', formData);
+            const payload: MetaCampaign = {
+                name: this.campaignForm.value.name,
+                objective: 'OUTCOME_SALES',
+                status: 'PAUSED'
+            };
+            this.metaApi.createMetaCampaign(payload).subscribe({
+                next: (response) => {
+                    console.log('✅ Campaign créée avec succès:', response);
+                },
+                error: (err) => {
+                    console.error('Erreur création campagne:', err);
+                    alert('Erreur création campagne');
+                }
+            });
+        } else {
+            console.warn('Formulaire invalide');
         }
-        return '';
-    }
-
-    getInstagramPreviewImage(): string {
-        if (this.sitePost && this.sitePost.photoUrls && this.sitePost.photoUrls.length > 0) {
-            if (this.selectedInstagramFormat === 'carousel') {
-                return this.getImageUrl(this.sitePost.photoUrls[this.currentCarouselIndex]);
-            }
-            return this.getImageUrl(this.sitePost.photoUrls[this.selectedInstagramImage]);
-        }
-        return '';
-    }
-
-    hasMultipleImages(): boolean {
-        return this.sitePost && this.sitePost.photoUrls && this.sitePost.photoUrls.length > 1;
     }
 }
