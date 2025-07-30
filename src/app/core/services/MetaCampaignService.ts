@@ -1,7 +1,7 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {MetaCampaign} from "../models/MetaCampaign";
 
 @Injectable({
@@ -13,6 +13,14 @@ export class MetaApiService {
     constructor(private http: HttpClient) {}
 
     createMetaCampaign(campaign: MetaCampaign): Observable<MetaCampaign> {
-        return this.http.post<MetaCampaign>(`${this.baseUrl}`, campaign);
+       /* return this.http.post<MetaCampaign>(`${this.baseUrl}`, campaign);*/
+        const fakeResponse: MetaCampaign = {
+            name:'gg',
+            objective: 'TRAFFIC',
+            status: 'PAUSED',
+            metaCampaignId:'6862220461740'
+        };
+
+        return of(fakeResponse);
     }
 }
