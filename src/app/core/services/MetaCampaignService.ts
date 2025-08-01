@@ -15,6 +15,7 @@ export class MetaApiService {
     createMetaCampaign(campaign: MetaCampaign): Observable<MetaCampaign> {
        /* return this.http.post<MetaCampaign>(`${this.baseUrl}`, campaign);*/
         const fakeResponse: MetaCampaign = {
+            id:1,
             name:'gg',
             objective: 'TRAFFIC',
             status: 'PAUSED',

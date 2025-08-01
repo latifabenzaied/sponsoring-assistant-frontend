@@ -1,5 +1,6 @@
 
 export interface MetaCampaign {
+    id?:number;
     name: string;
     objective: string;
     status: string;
@@ -7,20 +8,22 @@ export interface MetaCampaign {
 }
 
 export interface MetaAdSet {
+    id?: number; // optionnel si auto-généré par le backend
+    metaAdSetId?: string;
     name: string;
-    metaCampaignId: string;
     dailyBudget: number;
     billingEvent: string;
     optimizationGoal: string;
-    status: string;
-    bidStrategy: string;
+    status: MetaStatus;
+    startTime?: string; // ISO string (LocalDateTime en Java)
+    endTime?: string;
+    targetingJson?: string;
     bidAmount?: number;
+    bidStrategy?: string;
     bidConstraints?: string;
-    startTime: string;  // Format ISO 8601
-    endTime: string;    // Format ISO 8601
-    targetingJson: string;
-    metaAdSetId?: string;
-    id?: number;
+
+    campaign?: MetaCampaign; // relation ManyToOne
+    ads?: MetaAd[];          // relation OneToMany
 }
 export interface Ad {
     metaCampaignId?: string;
@@ -39,4 +42,8 @@ export interface MetaAd {
     adSet?: any;
 }
 
+export enum MetaStatus {
+    ACTIVE = 'ACTIVE',
+    PAUSED = 'PAUSED',
+}
 

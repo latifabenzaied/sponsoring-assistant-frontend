@@ -5,8 +5,8 @@ import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 import {Campaign, SitePost} from '../../../core/models/listing.interface';
 import {AiSuggestionsComponent} from '../../../shared/components/ai-suggestions/ai-suggestions.component';
 import {SitePostService} from "../../../core/services/SitePostService";
-import {catchError, finalize, Observable, switchMap, tap, throwError} from "rxjs";
-import {Ad, MetaAd, MetaAdSet, MetaCampaign} from "../../../core/models/MetaCampaign";
+import {catchError, finalize, switchMap, tap, throwError} from "rxjs";
+import {MetaAd, MetaAdSet, MetaCampaign, MetaStatus} from "../../../core/models/MetaCampaign";
 import {MetaApiService} from "../../../core/services/MetaCampaignService";
 import {MetaAdSetService} from "../../../core/services/MetaAdSetService";
 import {MetaAdService} from "../../../core/services/MetaAdService";
@@ -196,11 +196,12 @@ export class CampaignCreationComponent implements OnInit {
                 tap((createdCampaign) => {
                     console.log('✅ Étape 1 - Campagne créée:', createdCampaign);
                     this.createdCampaign = createdCampaign;
-                    console.log(createdCampaign.metaCampaignId)
+                    console.log(createdCampaign.id)
                 }),
 
                 switchMap((createdCampaign) => {
-                    const adSet = this.prepareAdSetData(createdCampaign.metaCampaignId!);
+                    const adSet = this.prepareAdSetData(createdCampaign);
+                    console.log('adSet', adSet);
                     return this.metaSetAd.createAdSet(adSet);
                 }),
 
@@ -211,6 +212,7 @@ export class CampaignCreationComponent implements OnInit {
 
                 switchMap((createdAdSet) => {
                     const ad = this.prepareAdData(createdAdSet.metaAdSetId!);
+                    console.log('adSet', ad);
                     return this.metaAd.createAd(ad);
                 }),
 
@@ -241,6 +243,7 @@ export class CampaignCreationComponent implements OnInit {
 
     private prepareCampaignData(): MetaCampaign {
         return {
+
             name: this.campaignForm.value.name || `Campagne_${Date.now()}`,
             objective: 'OUTCOME_TRAFFIC', // Objectif par défaut
             status: 'PAUSED', // Toujours créer en pause pour révision
@@ -248,17 +251,18 @@ export class CampaignCreationComponent implements OnInit {
         };
     }
 
-    private prepareAdSetData(campaignId: string): MetaAdSet {
+    private prepareAdSetData(campaign: MetaCampaign): MetaAdSet {
         const now = new Date();
         const endDate = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000)); // +30 jours par défaut
 
         return {
+            id:campaign.id,
             name: `AdSet_${Date.now()}`,
-            metaCampaignId: campaignId, // Lien avec la campagne créée
-            dailyBudget: this.campaignForm.value.budget || 1000, // 10€ par défaut (en centimes)
+            campaign: campaign,
+            dailyBudget: this.campaignForm.value.budget || 1000,
             billingEvent: 'IMPRESSIONS',
             optimizationGoal: 'LINK_CLICKS',
-            status: 'PAUSED',
+            status: MetaStatus.PAUSED,
             bidStrategy: 'LOWEST_COST_WITHOUT_CAP',
             bidAmount: 100, // Optionnel selon la stratégie
             startTime: this.campaignForm.value.startDate,
