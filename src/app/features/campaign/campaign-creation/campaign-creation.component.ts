@@ -46,7 +46,8 @@ export class CampaignCreationComponent implements OnInit {
                 private metaApi: MetaApiService,
                 private metaSetAd: MetaAdSetService,
                 private metaAd:MetaAdService,
-                private adService: AdService) {
+                private adService: AdService,
+                ) {
     }
 
     campaign: Campaign = {
@@ -201,7 +202,6 @@ export class CampaignCreationComponent implements OnInit {
 
                 switchMap((createdCampaign) => {
                     const adSet = this.prepareAdSetData(createdCampaign);
-                    console.log('adSet', adSet);
                     return this.metaSetAd.createAdSet(adSet);
                 }),
 
@@ -211,8 +211,9 @@ export class CampaignCreationComponent implements OnInit {
                 }),
 
                 switchMap((createdAdSet) => {
+                    console.log(createdAdSet);
                     const ad = this.prepareAdData(createdAdSet.metaAdSetId!);
-                    console.log('adSet', ad);
+                    console.log('ad', ad);
                     return this.metaAd.createAd(ad);
                 }),
 
@@ -227,6 +228,7 @@ export class CampaignCreationComponent implements OnInit {
 
                 // Nettoyage final
                 finalize(() => {
+                    this.router.navigate(['/listing']);
                /*     this.isLoading = false;*/
                 })
             )
@@ -256,9 +258,8 @@ export class CampaignCreationComponent implements OnInit {
         const endDate = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000)); // +30 jours par défaut
 
         return {
-            id:campaign.id,
             name: `AdSet_${Date.now()}`,
-            campaign: campaign,
+            metaCampaignId: campaign.metaCampaignId,
             dailyBudget: this.campaignForm.value.budget || 1000,
             billingEvent: 'IMPRESSIONS',
             optimizationGoal: 'LINK_CLICKS',
@@ -273,10 +274,14 @@ export class CampaignCreationComponent implements OnInit {
     }
 
     private prepareAdData(adSetId: string): MetaAd {
+        const fileName = this.sitePost.photoUrls[0]?.split('/').pop();
         return {
-            name: this.campaignForm.value.name || `Ad_${Date.now()}`,
-            metaAdSetId: adSetId, // Lien avec l'AdSet créé
-            status: 'PAUSED', // Toujours créer en pause
+            name: this.sitePost.title,
+            metaAdSetId: adSetId,
+            status: 'PAUSED',
+            imageFileName: fileName,
+            siteAdId:this.sitePostId,
+            message:this.sitePost.description
         };
     }
 

@@ -21,13 +21,13 @@ export interface MetaAdSet {
     bidAmount?: number;
     bidStrategy?: string;
     bidConstraints?: string;
-
-    campaign?: MetaCampaign; // relation ManyToOne
+    metaCampaignId?: string; // relation ManyToOne
     ads?: MetaAd[];          // relation OneToMany
 }
 export interface Ad {
     metaCampaignId?: string;
     metaAdSetId?: string;
+
     metaAdId?: string;
     idSitePost: number;
 }
@@ -40,6 +40,9 @@ export interface MetaAd {
     metaAdSetId: string;
     createdAt?: Date;
     adSet?: any;
+    imageFileName?: string;
+    siteAdId: number;
+    message: string;
 }
 
 export enum MetaStatus {

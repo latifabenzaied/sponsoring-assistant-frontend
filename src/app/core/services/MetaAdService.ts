@@ -10,6 +10,12 @@ export class MetaAdService {
     private readonly baseUrl = 'http://localhost:9093/api/v1/metaAd';
     constructor(private http: HttpClient) {}
     createAd(ad: MetaAd): Observable<MetaAd> {
-        return this.http.post<MetaAd>(this.baseUrl, ad);
+        return this.http.post<MetaAd>(this.baseUrl, ad, {
+            headers: {
+                'Content-Type': 'application/json' // 👈 explicitement JSON
+            }
+        });
     }
+
+
 }
