@@ -1,3 +1,11 @@
+<div *ngIf="showPopup" class="fixed top-5 right-5 bg-red-100 border border-red-300 text-red-900 px-6 py-4 rounded-lg shadow-lg z-50 animate-fade-in-out w-96">
+    <strong class="block mb-2">Erreurs de validation</strong>
+    <ul class="list-disc list-inside text-sm">
+        <li *ngFor="let msg of validationMessages">{{ msg }}</li>
+    </ul>
+</div>
+
+
 <div class="min-h-screen bg-gray-50 py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
@@ -149,7 +157,7 @@
                 <!-- Submit Buttons -->
                 <div class="flex justify-end space-x-4">
                     <button (click)="saveDraft(listingForm.value)" type="button" class="btn-secondary">Save Draft</button>
-                    <button type="submit" class="btn-primary" [disabled]="listingForm.invalid">Proceed to Campaign</button>
+                    <button type="submit" class="btn-primary" >Proceed to Campaign</button>
                 </div>
             </form>
 
@@ -168,3 +176,4 @@
         </div>
     </div>
 </div>
+

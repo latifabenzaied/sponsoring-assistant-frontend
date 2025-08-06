@@ -12,7 +12,7 @@ export class MetaAdService {
     createAd(ad: MetaAd): Observable<MetaAd> {
         return this.http.post<MetaAd>(this.baseUrl, ad, {
             headers: {
-                'Content-Type': 'application/json' // 👈 explicitement JSON
+                'Content-Type': 'application/json'
             }
         });
     }

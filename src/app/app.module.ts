@@ -5,6 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { App } from './app.component';
 import {ReactiveFormsModule} from "@angular/forms";
 import {ListingCreationComponent} from "./features/listing/listing-creation/listing-creation.component";
+import {MatDialogModule} from "@angular/material/dialog";
 
 
 @NgModule({
@@ -15,7 +16,8 @@ import {ListingCreationComponent} from "./features/listing/listing-creation/list
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
-    App
+    App,
+    MatDialogModule,
 
   ],
   providers: [],

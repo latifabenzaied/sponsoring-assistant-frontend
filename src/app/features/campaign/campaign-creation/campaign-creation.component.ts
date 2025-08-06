@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Campaign, SitePost} from '../../../core/models/listing.interface';
+import { SitePost} from '../../../core/models/listing.interface';
 import {AiSuggestionsComponent} from '../../../shared/components/ai-suggestions/ai-suggestions.component';
 import {SitePostService} from "../../../core/services/SitePostService";
 import {catchError, finalize, switchMap, tap, throwError} from "rxjs";
@@ -10,7 +10,7 @@ import {MetaAd, MetaAdSet, MetaCampaign, MetaStatus} from "../../../core/models/
 import {MetaApiService} from "../../../core/services/MetaCampaignService";
 import {MetaAdSetService} from "../../../core/services/MetaAdSetService";
 import {MetaAdService} from "../../../core/services/MetaAdService";
-import {AdService} from "../../../core/services/AdService";
+import {combineLatest} from 'rxjs';
 
 @Component({
     selector: 'app-campaign-creation',
@@ -33,7 +33,8 @@ export class CampaignCreationComponent implements OnInit {
         {value: 'single-video', label: 'Single Video'}
     ];
     campaignForm!: FormGroup;
-
+    showPopup = false;
+    isLoading = false;
     createdCampaign?: MetaCampaign;
     createdAdSet?: MetaAdSet;
     createdAd?: MetaAd;
@@ -45,63 +46,28 @@ export class CampaignCreationComponent implements OnInit {
                 private fb: FormBuilder,
                 private metaApi: MetaApiService,
                 private metaSetAd: MetaAdSetService,
-                private metaAd:MetaAdService,
-                private adService: AdService,
-                ) {
+                private metaAd: MetaAdService,
+    ) {
     }
 
-    campaign: Campaign = {
-        listingId: '',
-        name: '',
-        budget: 700,
-        duration: 14,
-        startDate: new Date(),
-        endDate: new Date(),
-        targeting: {
-            ageRange: {
-                min: 25,
-                max: 65
-            },
-            interests: ['Real Estate', 'Home Buying'],
-            location: {
-                radius: 20,
-                center: ''
-            }
-        },
-        platforms: ['facebook', 'instagram'],
-        status: 'draft'
-    };
 
     async ngOnInit() {
-
-        const savedListing = localStorage.getItem('currentListing');
-        /* if (savedListing) {
-           this.listing = JSON.parse(savedListing);
-         } else {
-          this.router.navigate(['/listing']);
-           return;
-         }*/
         this.campaignForm = this.fb.group({
             name: ['', Validators.required],
             budget: [null, [Validators.required, Validators.min(1)]],
-            duration: [null, [Validators.required, Validators.min(1)]],
+            duration: [{value: null, disabled: true}, [Validators.required, Validators.min(1)]],
             startDate: ['', Validators.required],
             endDate: ['', Validators.required],
         });
-
         this.actR.params.subscribe(async (params) => {
                 this.sitePostId = params['id'];
             }
-        )
+        );
 
-        /*this.adService.addAd(ad,  this.sitePostId).subscribe({
-            next: response => {
-                console.log('Ad créée avec succès:', response);
-            },
-            error: err => {
-                console.error('Erreur lors de la création de l\'Ad:', err);
-            }
-        });*/
+        this.campaignForm.valueChanges.subscribe(() => {
+            this.getCampaignDuration();
+            this.getTotalBudget();
+        });
 
         setInterval(() => {
             if (this.selectedInstagramFormat === 'carousel') {
@@ -110,38 +76,34 @@ export class CampaignCreationComponent implements OnInit {
         }, 3000);
 
         await this.getSitePostById(this.sitePostId);
+        this.autoCalculateDuration();
 
     }
-
     getAdTitle(): string {
         return `${this.sitePost.propertyType} for ${this.sitePost.type === 'SALE' ? 'Sale' : 'Rent'} - ${this.sitePost.area}m²`;
     }
-
     getAdDescription(): string {
         return `${this.sitePost.description.substring(0, 100)}... Perfect location in ${this.sitePost.location}. Contact us for more details!`;
     }
-
     getCampaignDuration(): string {
-        /* if (this.campaign.startDate && this.campaign.endDate) {
-             const start = new Date(this.campaign.startDate);
-             const end = new Date(this.campaign.endDate);
-             const startStr = start.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
-             const endStr = end.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
-             return `${startStr} – ${endStr}`;
-         }*/
+        if (this.campaignForm.value.startDate && this.campaignForm.value.endDate) {
+            const start = new Date(this.campaignForm.value.startDate);
+            const end = new Date(this.campaignForm.value.endDate);
+            const startStr = start.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+            const endStr = end.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+            return `${startStr} – ${endStr}`;
+        }
         return ` days`;
     }
-
+    getTotalBudget(): string {
+        if (this.campaignForm.value.budget) {
+            return this.campaignForm.value.budget + 'dt';
+        }
+        return `0`;
+    }
     navigateToListing() {
         this.router.navigate(['/listing']);
     }
-
-    launchCampaign() {
-        console.log('Campaign launched:', this.campaign);
-        alert('🚀 Campaign launched successfully! Your ads are now live on Facebook and Instagram.');
-    }
-
-
     async getSitePostById(id: number): Promise<void> {
         try {
             const res = await this.sitePostService.getSitePostById(id).toPromise();
@@ -153,7 +115,6 @@ export class CampaignCreationComponent implements OnInit {
             console.error('Error fetching responses:', error);
         }
     }
-
     getImageUrl(imageName: any): string {
 
         if (!imageName) {
@@ -163,35 +124,9 @@ export class CampaignCreationComponent implements OnInit {
 
         return `${this.baseUrl}/images/${fileName}`;
     }
-
-
-   /* onSubmit(): void {
-        if (this.campaignForm.valid) {
-            const formData = this.campaignForm.value;
-            console.log('Formulaire soumis :', formData);
-            const payload: MetaCampaign = {
-                name: this.campaignForm.value.name,
-                objective: 'TRAFFIC',
-                status: 'PAUSED'
-            };
-            this.metaApi.createMetaCampaign(payload).subscribe({
-                next: (response) => {
-                    console.log('✅ Campaign créée avec succès:', response);
-                },
-                error: (err) => {
-                    console.error('Erreur création campagne:', err);
-                    alert('Erreur création campagne');
-                }
-            });
-        } else {
-            console.warn('Formulaire invalide');
-        }
-    }*/
-
-
     onSubmit(): void {
         const campaign = this.prepareCampaignData();
-        // ÉTAPE 1 : Création de la campagne
+        this.isLoading = true;
         this.metaApi.createMetaCampaign(campaign)
             .pipe(
                 tap((createdCampaign) => {
@@ -218,31 +153,33 @@ export class CampaignCreationComponent implements OnInit {
                 }),
 
                 tap((createdAd) => {
-                    console.log('✅ Étape 3 - Publicité créée:', createdAd);
+                    console.log('Étape 3 - Publicité créée:', createdAd);
                     this.createdAd = createdAd;
                 }),
                 catchError((error) => {
-                    console.error(`❌ Erreur à l'étape`, error);
+                    console.error(`Erreur à l'étape`, error);
                     return throwError(error);
                 }),
-
-                // Nettoyage final
                 finalize(() => {
-                    this.router.navigate(['/listing']);
-               /*     this.isLoading = false;*/
+                    this.isLoading = false;
+                    /*     this.isLoading = false;*/
                 })
             )
             .subscribe({
                 next: (finalResult) => {
-                    console.log('🎉 Workflow complet terminé avec succès!');
+                    setTimeout(() => {
+                        this.showPopup = false;
+                        this.router.navigate(['/listing']);
+                    }, 4000);
+
                 },
                 error: (error) => {
-                    console.error('💥 Échec du workflow:', error);
+
+
+                    console.error('Échec du workflow:', error);
                 }
             });
     }
-
-
     private prepareCampaignData(): MetaCampaign {
         return {
 
@@ -252,7 +189,6 @@ export class CampaignCreationComponent implements OnInit {
             // metaCampaignId sera généré par le backend
         };
     }
-
     private prepareAdSetData(campaign: MetaCampaign): MetaAdSet {
         const now = new Date();
         const endDate = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000)); // +30 jours par défaut
@@ -268,11 +204,10 @@ export class CampaignCreationComponent implements OnInit {
             bidAmount: 100, // Optionnel selon la stratégie
             startTime: this.campaignForm.value.startDate,
             endTime: this.campaignForm.value.endDate,
-            targetingJson:  "{\"geo_locations\":{\"countries\":[\"TN\"]},\"age_min\":25,\"age_max\":55,\"interests\":[{\"id\":\"6003139266461\",\"name\":\"Immobilier\"}]}",
+            targetingJson: "{\"geo_locations\":{\"countries\":[\"TN\"]},\"age_min\":25,\"age_max\":55,\"interests\":[{\"id\":\"6003139266461\",\"name\":\"Immobilier\"}]}",
 
         };
     }
-
     private prepareAdData(adSetId: string): MetaAd {
         const fileName = this.sitePost.photoUrls[0]?.split('/').pop();
         return {
@@ -280,9 +215,25 @@ export class CampaignCreationComponent implements OnInit {
             metaAdSetId: adSetId,
             status: 'PAUSED',
             imageFileName: fileName,
-            siteAdId:this.sitePostId,
-            message:this.sitePost.description
+            siteAdId: this.sitePostId,
+            message: this.sitePost.description
         };
+    }
+    private autoCalculateDuration(): void {
+        combineLatest([
+            this.campaignForm.get('startDate')!.valueChanges,
+            this.campaignForm.get('endDate')!.valueChanges
+        ]).subscribe(([start, end]) => {
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+
+            if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && endDate >= startDate) {
+                const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+                this.campaignForm.get('duration')!.setValue(days, {emitEvent: false});
+            } else {
+                this.campaignForm.get('duration')!.setValue(null, {emitEvent: false});
+            }
+        });
     }
 
 

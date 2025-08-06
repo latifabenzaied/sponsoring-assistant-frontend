@@ -33,7 +33,7 @@
                                 <h3 class="text-lg font-medium text-gray-900">{{sitePost.title }}</h3>
                                 <p class="text-sm text-gray-600">{{ sitePost.location}}</p>
                                 <div class="flex items-center space-x-4 mt-1">
-                                    <span class="text-lg font-semibold text-primary-600">{{ sitePost.price}}€</span>
+                                    <span class="text-lg font-semibold text-primary-600">{{ sitePost.price}}Dt</span>
                                     <span class="text-sm text-gray-500">{{ sitePost.area }}m²</span>
                                 </div>
                             </div>
@@ -51,36 +51,9 @@
                     <div *ngIf="showCampaignDetails" class="mt-6 pt-6 border-t border-gray-200">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                            <div class="md:col-span-2">
-                                <label class="form-label">Campaign Name</label>
-                                <input
-                                        type="text"
-                                        class="form-input"
-                                        formControlName="name"
-                                        placeholder="Summer 2024 - Downtown Apartment"
-                                />
-                            </div>
 
-                            <div>
-                                <label class="form-label">Budget (€)</label>
-                                <input
-                                        type="number"
-                                        class="form-input"
-                                        formControlName="budget"
-                                        placeholder="700"
-                                />
-                                {{sitePost.price}}
-                            </div>
 
-                            <div>
-                                <label class="form-label">Duration (days)</label>
-                                <input
-                                        type="number"
-                                        class="form-input"
-                                        formControlName="duration"
-                                        placeholder="14"
-                                />
-                            </div>
+
 
                             <div>
                                 <label class="form-label">Start Date</label>
@@ -99,7 +72,25 @@
                                         formControlName="endDate"
                                 />
                             </div>
+                            <div>
+                                <label class="form-label">Budget (€)</label>
+                                <input
+                                        type="number"
+                                        class="form-input"
+                                        formControlName="budget"
+                                        placeholder="700"
+                                />
 
+                            </div>
+
+                            <div>
+                                <label class="form-label">Duration (days)</label>
+                                <input
+                                        type="number"
+                                        class="form-input"
+                                        formControlName="duration"
+                                />
+                            </div>
                         </div>
                     </div>
                     </form>
@@ -144,6 +135,7 @@
                             <p class="text-sm text-gray-600 mb-3">{{ getAdDescription() }}</p>
                         </div>
 
+                        <!-- Facebook Image -->
                         <!-- Facebook Image -->
                         <div class="relative">
                             <img
@@ -341,7 +333,7 @@
 
                             <div class="flex items-center justify-between py-2 border-b border-gray-100">
                                 <span class="text-sm text-gray-600">Total Budget</span>
-                                <span class="text-sm font-medium text-gray-900">€{{234}}</span>
+                                <span class="text-sm font-medium text-gray-900">{{ getTotalBudget() }}</span>
                             </div>
 
                             <div class="flex items-center justify-between py-2 border-b border-gray-100">
@@ -349,13 +341,13 @@
                                 <span class="text-sm font-medium text-gray-900">{{ getCampaignDuration() }}</span>
                             </div>
 
-                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                        <!--    <div class="flex items-center justify-between py-2 border-b border-gray-100">
                                 <span class="text-sm text-gray-600">Platforms</span>
                                 <div class="flex space-x-1">
                                     <span class="text-lg">📘</span>
                                     <span class="text-lg">📸</span>
                                 </div>
-                            </div>
+                            </div>-->
                         </div>
 
                         <div class="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
@@ -370,18 +362,32 @@
 
                         <button
                                 (click)="onSubmit()"
-                                class="w-full mt-6 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-primary-700 hover:to-secondary-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                class="w-full mt-6 bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-primary-700 hover:to-secondary-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex justify-center items-center relative"
                         >
-                            Confirm and Launch Campaign
+                            <svg
+                                    *ngIf="isLoading"
+                                    class="animate-spin h-5 w-5 text-white"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                            >
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span *ngIf="!isLoading">Confirm and Launch Campaign</span>
                         </button>
                     </div>
+                    <div *ngIf="showPopup" class="fixed top-5 right-5 bg-blue-100 border border-blue-300 text-blue-900 px-6 py-4 rounded-lg shadow-lg z-50 animate-fade-in-out">
+                        <strong>✅ Campagne lancée</strong><br>
+                        Your campaign has been successfully scheduled and will go live on the planned start date.
+                    </div>
+
 
                     <!-- AI Suggestions -->
-                    <app-ai-suggestions
+                  <!--  <app-ai-suggestions
                             suggestionType="campaign"
                             [listingData]="sitePost"
                             [campaignData]="campaign"
-                    ></app-ai-suggestions>
+                    ></app-ai-suggestions>-->
                 </div>
             </div>
         </div>
