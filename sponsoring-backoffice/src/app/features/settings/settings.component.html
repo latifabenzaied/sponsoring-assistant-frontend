@@ -1,0 +1,175 @@
+<div class="min-h-screen bg-gray-50 py-6">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Settings</h1>
+      <p class="mt-2 text-gray-600">Manage your application settings and preferences</p>
+    </div>
+
+    <div class="space-y-8">
+      <!-- General Settings -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">General Settings</h2>
+          <button class="btn-primary" (click)="saveGeneralSettings()">Save Changes</button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="form-label">Site Name</label>
+            <input type="text" class="form-input" [(ngModel)]="siteName" />
+          </div>
+          <div>
+            <label class="form-label">Contact Email</label>
+            <input type="email" class="form-input" [(ngModel)]="contactEmail" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="form-label">Site Description</label>
+            <textarea class="form-input" rows="3" [(ngModel)]="siteDescription"></textarea>
+          </div>
+          <div>
+            <label class="form-label">Support Phone</label>
+            <input type="tel" class="form-input" [(ngModel)]="supportPhone" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Email Settings -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">Email Settings</h2>
+          <button class="btn-primary" (click)="saveEmailSettings()">Save Changes</button>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">Email Notifications</h3>
+              <p class="text-sm text-gray-500">Receive email notifications for important events</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" class="sr-only peer" [(ngModel)]="emailNotifications" />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">Marketing Emails</h3>
+              <p class="text-sm text-gray-500">Receive promotional and marketing emails</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" class="sr-only peer" [(ngModel)]="marketingEmails" />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">Weekly Reports</h3>
+              <p class="text-sm text-gray-500">Receive weekly performance reports</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" class="sr-only peer" [(ngModel)]="weeklyReports" />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Settings -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">Security Settings</h2>
+          <button class="btn-primary" (click)="saveSecuritySettings()">Save Changes</button>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">Two-Factor Authentication</h3>
+              <p class="text-sm text-gray-500">Add an extra layer of security to your account</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" class="sr-only peer" [(ngModel)]="twoFactorAuth" />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="form-label">Session Timeout (minutes)</label>
+              <input type="number" class="form-input" [(ngModel)]="sessionTimeout" min="5" max="120" />
+            </div>
+            <div>
+              <label class="form-label">Password Expiry (days)</label>
+              <input type="number" class="form-input" [(ngModel)]="passwordExpiry" min="30" max="365" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- API Settings -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">API Settings</h2>
+          <button class="btn-primary" (click)="saveApiSettings()">Save Changes</button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="form-label">Rate Limit (requests/hour)</label>
+            <input type="number" class="form-input" [(ngModel)]="apiRateLimit" min="100" max="10000" />
+          </div>
+          <div>
+            <label class="form-label">Timeout (seconds)</label>
+            <input type="number" class="form-input" [(ngModel)]="apiTimeout" min="10" max="120" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Notification Settings -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">Notification Settings</h2>
+          <button class="btn-primary" (click)="saveNotificationSettings()">Save Changes</button>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">Push Notifications</h3>
+              <p class="text-sm text-gray-500">Receive push notifications in your browser</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" class="sr-only peer" [(ngModel)]="pushNotifications" />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">Email Alerts</h3>
+              <p class="text-sm text-gray-500">Receive alerts via email</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" class="sr-only peer" [(ngModel)]="emailAlerts" />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-medium text-gray-900">SMS Alerts</h3>
+              <p class="text-sm text-gray-500">Receive alerts via SMS</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" class="sr-only peer" [(ngModel)]="smsAlerts" />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

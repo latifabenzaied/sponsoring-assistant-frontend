@@ -1,0 +1,78 @@
+<div class="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <div class="text-center">
+      <div class="mx-auto h-16 w-16 bg-gradient-to-r from-primary-500 to-primary-700 rounded-xl flex items-center justify-center">
+        <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+        </svg>
+      </div>
+      <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+        Admin Panel
+      </h2>
+      <p class="mt-2 text-sm text-gray-600">
+        Sign in to access the RealEstate CRM back office
+      </p>
+    </div>
+
+    <div class="card p-8">
+      <form class="space-y-6" (ngSubmit)="onSubmit()">
+        <div *ngIf="error" class="bg-danger-50 border border-danger-200 text-danger-700 px-4 py-3 rounded-lg">
+          {{ error }}
+        </div>
+
+        <div>
+          <label class="form-label">Email address</label>
+          <input 
+            type="email" 
+            class="form-input" 
+            [(ngModel)]="email"
+            name="email"
+            placeholder="admin@realestate.com"
+            required
+            [disabled]="isLoading"
+          />
+        </div>
+
+        <div>
+          <label class="form-label">Password</label>
+          <input 
+            type="password" 
+            class="form-input" 
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Enter your password"
+            required
+            [disabled]="isLoading"
+          />
+        </div>
+
+        <div>
+          <button 
+            type="submit" 
+            class="w-full btn-primary"
+            [disabled]="isLoading"
+          >
+            <svg 
+              *ngIf="isLoading" 
+              class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" 
+              fill="none" 
+              viewBox="0 0 24 24"
+            >
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ isLoading ? 'Signing in...' : 'Sign in' }}
+          </button>
+        </div>
+
+        <div class="text-center">
+          <div class="bg-primary-50 border border-primary-200 rounded-lg p-4">
+            <p class="text-sm text-primary-700 font-medium mb-2">Demo Credentials:</p>
+            <p class="text-xs text-primary-600">Email: admin&#64;realestate.com</p>
+            <p class="text-xs text-primary-600">Password: admin123</p>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

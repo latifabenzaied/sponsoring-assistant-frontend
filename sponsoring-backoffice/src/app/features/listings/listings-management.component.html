@@ -1,0 +1,468 @@
+<div class="min-h-screen bg-gray-50 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Listings Management</h1>
+            <p class="mt-2 text-gray-600">Manage all property listings in the system</p>
+        </div>
+
+        <!-- Search and Actions -->
+        <div class="card p-6 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex-1 max-w-md">
+                    <div class="relative">
+                        <input
+                                type="text"
+                                class="form-input pl-10"
+                                placeholder="Search listings..."
+                                [(ngModel)]="searchTerm"
+                                (keyup.enter)="onSearch()"
+                        />
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button class="btn-secondary" (click)="onSearch()">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        Search
+                    </button>
+                    <button class="btn-primary">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Add Listing
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+            <span class="ml-3 text-gray-600">Loading listings...</span>
+        </div>
+
+        <!-- Listings Table -->
+        <div *ngIf="!isLoading" class="card overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                    <tr>
+                        <th class="table-header">Property</th>
+                        <th class="table-header">Type</th>
+                        <th class="table-header">Price</th>
+                        <th class="table-header">Location</th>
+                        <th class="table-header">Status</th>
+                        <th class="table-header">Created</th>
+                        <th class="table-header">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tr *ngFor="let listing of listings" class="hover:bg-gray-50">
+                        <td class="table-cell">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-12 w-12">
+                                    <img
+                                            class="h-12 w-12 rounded-lg object-cover"
+                                            [src]="getImageUrl(listing.photoUrls[0]) || 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg'"
+                                            [alt]="listing.title"
+                                    />
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ listing.title }}</div>
+                                    <div class="text-sm text-gray-500">{{ listing.propertyType }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="table-cell">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                      [class.bg-primary-100]="listing.type === 'SALE'"
+                      [class.text-primary-800]="listing.type === 'SALE'"
+                      [class.bg-secondary-100]="listing.type === 'RENT'"
+                      [class.text-secondary-800]="listing.type === 'RENT'">
+                  {{ getTypeLabel(listing.type) }}
+                </span>
+                        </td>
+                        <td class="table-cell">
+                            <div class="text-sm text-gray-900">€{{ listing.price | number }}</div>
+                            <div class="text-sm text-gray-500">{{ listing.area }}m²</div>
+                        </td>
+                        <td class="table-cell">
+                            <div class="text-sm text-gray-900">{{ listing.location }}</div>
+                        </td>
+                        <td class="table-cell">
+                <span class="status-badge" [class]="getStatusClass(listing.status)">
+                  {{ listing.status | titlecase }}
+                </span>
+                        </td>
+                        <td class="table-cell">
+                            <div class="text-sm text-gray-900">{{ listing.publishedAt | date:'short' }}</div>
+                        </td>
+                        <td class="table-cell">
+                            <div class="flex items-center space-x-2">
+                                <button
+                                        class="text-secondary-600 hover:text-secondary-900 text-sm font-medium"
+                                        (click)="viewListingAds(listing)"
+                                >
+                                    View Ads
+                                </button>
+                                <button class="text-primary-600 hover:text-primary-900 text-sm font-medium">
+                                    Edit
+                                </button>
+                                <button
+                                        class="text-danger-600 hover:text-danger-900 text-sm font-medium"
+                                        (click)="deleteListing(listing.idSitePost!)"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        <button class="btn-secondary" [disabled]="currentPage === 1" (click)="goToPreviousPage()">Previous</button>
+                        <button class="btn-secondary" [disabled]="currentPage === totalPages" (click)="goToNextPage()">Next</button>
+
+                    </div>
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                Showing {{ (currentPage - 1) * 10 + 1 }} to {{ Math.min(currentPage * 10, totalItems) }} of {{ totalItems }} results
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                                <button
+                                        class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                                        [disabled]="currentPage === 1"
+                                        (click)="goToPreviousPage()"
+                                >
+                                    Previous
+                                </button>
+
+                                <button
+                                        class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                                        [disabled]="currentPage === totalPages"
+                                        (click)="goToNextPage()"
+                                >
+                                    Next
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ad History Modal -->
+<div *ngIf="showAdHistoryModal" class="fixed inset-0 z-50 overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeAdHistoryModal()"></div>
+
+        <!-- Modal panel -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-secondary-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <svg class="h-6 w-6 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                            Ads for "{{ selectedListing?.title }}"
+                        </h3>
+
+                        <!-- Loading State -->
+                        <div *ngIf="isLoadingAds" class="flex justify-center items-center py-8">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary-600"></div>
+                            <span class="ml-3 text-gray-600">Loading ads...</span>
+                        </div>
+
+                        <!-- No Ads State -->
+                        <div *ngIf="!isLoadingAds && listingAds.length === 0" class="text-center py-8">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <h4 class="mt-2 text-lg font-medium text-gray-900">No ads created for this listing</h4>
+                            <p class="mt-1 text-sm text-gray-500">Start promoting this property by creating your first ad.</p>
+                            <div class="mt-6">
+                                <button
+                                        class="btn-primary"
+                                        (click)="closeAdHistoryModal(); openCreateAdModal(selectedListing!)"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    Create New Ad
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Ads List -->
+                        <div *ngIf="!isLoadingAds && listingAds.length > 0" class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <p class="text-sm text-gray-600">{{ listingAds.length }} ad(s) found</p>
+                                <button
+                                        class="btn-secondary text-sm"
+                                        (click)="closeAdHistoryModal(); openCreateAdModal(selectedListing!)"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    Create Another Ad
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div *ngFor="let ad of listingAds" class="card p-4 hover:shadow-md transition-shadow cursor-pointer" (click)="viewAdDetails(ad)">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="flex-shrink-0">
+                                            <div *ngIf="ad.imageUrl" class="w-16 h-16 rounded-lg overflow-hidden">
+                                                <img [src]="ad.imageUrl" [alt]="ad.title" class="w-full h-full object-cover">
+                                            </div>
+                                            <div *ngIf="!ad.imageUrl" class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between">
+                                                <h4 class="text-sm font-medium text-gray-900 truncate">{{ ad.name }}</h4>
+                                                <span class="status-badge ml-2" [class]="getAdStatusClass(ad.status)">
+                          {{ ad.status }}
+                        </span>
+                                            </div>
+                                            <p class="text-sm text-gray-600 mt-1 truncate">{{ ad.title }}</p>
+                                            <div class="flex items-center justify-between mt-2">
+                                                <span class="text-xs text-gray-500">{{ ad.createdAt | date:'short' }}</span>
+                                                <span class="text-xs text-gray-400 font-mono">{{ ad.metaAdId || 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                        type="button"
+                        class="btn-secondary"
+                        (click)="closeAdHistoryModal()"
+                >
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Ad Modal -->
+<div *ngIf="showCreateAdModal" class="fixed inset-0 z-50 overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeCreateAdModal()"></div>
+
+        <!-- Modal panel -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-primary-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <svg class="h-6 w-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                            Create Ad for "{{ selectedListing?.title }}"
+                        </h3>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Form Section -->
+                            <div class="space-y-4">
+                                <!-- Campaign Selection -->
+                                <div>
+                                    <label class="form-label">Campaign</label>
+                                    <select
+                                            class="form-input"
+                                            [(ngModel)]="selectedCampaignId"
+                                            (change)="onCampaignChange()"
+                                            name="campaign"
+                                            required
+                                    >
+                                        <option value="">Select a campaign</option>
+                                        <option *ngFor="let campaign of availableCampaigns" [value]="campaign.id">
+                                            {{ campaign.name }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Ad Set Selection -->
+                                <div>
+                                    <label class="form-label">Ad Set</label>
+                                    <select
+                                            class="form-input"
+                                            [(ngModel)]="selectedAdSetId"
+                                            name="adSet"
+                                            [disabled]="!selectedCampaignId"
+                                            required
+                                    >
+                                        <option value="">Select an ad set</option>
+                                        <option *ngFor="let adSet of availableAdSets" [value]="adSet.id">
+                                            {{ adSet.name }} (€{{ adSet.budget }}/day)
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="form-label">Ad Name</label>
+                                    <input
+                                            type="text"
+                                            class="form-input"
+                                            [(ngModel)]="newAd.name"
+                                            name="adName"
+                                            placeholder="Enter ad name"
+                                            required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="form-label">Title</label>
+                                    <input
+                                            type="text"
+                                            class="form-input"
+                                            [(ngModel)]="newAd.title"
+                                            name="title"
+                                            placeholder="Enter ad title"
+                                            required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label class="form-label">Description</label>
+                                    <textarea
+                                            class="form-input"
+                                            rows="3"
+                                            [(ngModel)]="newAd.description"
+                                            name="description"
+                                            placeholder="Enter ad description"
+                                    ></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="form-label">Destination URL</label>
+                                    <input
+                                            type="url"
+                                            class="form-input"
+                                            [(ngModel)]="newAd.metaAd!.creative!.object_story_spec!.link_data!.link"
+                                            name="destinationUrl"
+                                            placeholder="https://yourwebsite.com/listings/123"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Preview Section -->
+                            <div class="space-y-4">
+                                <h4 class="text-md font-medium text-gray-900">Listing Preview</h4>
+                                <div class="card p-4 bg-gray-50">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="flex-shrink-0">
+                                            <img
+                                                    [src]="selectedListing?.photoUrls?.[0] || 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg'"
+                                                    [alt]="selectedListing?.title"
+                                                    class="w-20 h-20 rounded-lg object-cover"
+                                            />
+                                        </div>
+                                        <div class="flex-1">
+                                            <h5 class="font-semibold text-gray-900">{{ selectedListing?.title }}</h5>
+                                            <p class="text-sm text-gray-600 mt-1">{{ selectedListing?.location }}</p>
+                                            <div class="flex items-center justify-between mt-2">
+                        <span class="text-lg font-bold text-primary-600">
+                          €{{ selectedListing?.price | number }}
+                            <span class="text-sm font-normal text-gray-500" *ngIf="selectedListing?.type === 'RENT'">/month</span>
+                        </span>
+                                                <span class="text-sm text-gray-500">{{ selectedListing?.area }}m²</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h4 class="text-md font-medium text-gray-900">Ad Preview</h4>
+                                <div class="border rounded-lg p-4 bg-white">
+                                    <div class="max-w-sm">
+                                        <div class="mb-3">
+                                            <img
+                                                    [src]="selectedListing?.photoUrls?.[0] || 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg'"
+                                                    [alt]="newAd.title"
+                                                    class="w-full h-48 object-cover rounded-lg"
+                                            />
+                                        </div>
+                                        <div class="space-y-2">
+                                            <h5 class="font-semibold text-gray-900">
+                                                {{ newAd.title || 'Your ad title will appear here' }}
+                                            </h5>
+                                            <p class="text-sm text-gray-600" *ngIf="newAd.description">
+                                                {{ newAd.description }}
+                                            </p>
+                                            <div class="flex items-center justify-between pt-2 border-t">
+                                                <span class="text-xs text-gray-500">Sponsored</span>
+                                                <button class="text-xs text-primary-600 font-medium">Learn More</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                        type="button"
+                        class="btn-primary sm:ml-3"
+                        (click)="createAdFromListing()"
+                        [disabled]="isCreatingAd || !newAd.name?.trim() || !newAd.title?.trim() || !selectedAdSetId"
+                >
+                    <svg
+                            *ngIf="isCreatingAd"
+                            class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                    >
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {{ isCreatingAd ? 'Creating...' : 'Create Ad' }}
+                </button>
+                <button
+                        type="button"
+                        class="btn-secondary sm:mr-3"
+                        (click)="closeCreateAdModal()"
+                        [disabled]="isCreatingAd"
+                >
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

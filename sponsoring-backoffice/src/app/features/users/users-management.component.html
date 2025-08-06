@@ -1,0 +1,162 @@
+<div class="min-h-screen bg-gray-50 py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Users Management</h1>
+      <p class="mt-2 text-gray-600">Manage all users in the system</p>
+    </div>
+
+    <!-- Search and Actions -->
+    <div class="card p-6 mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex-1 max-w-md">
+          <div class="relative">
+            <input
+              type="text"
+              class="form-input pl-10"
+              placeholder="Search users..."
+              [(ngModel)]="searchTerm"
+              (keyup.enter)="onSearch()"
+            />
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button class="btn-secondary" (click)="onSearch()">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Search
+          </button>
+          <button class="btn-primary">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Add User
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <span class="ml-3 text-gray-600">Loading users...</span>
+    </div>
+
+    <!-- Users Table -->
+    <div *ngIf="!isLoading" class="card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="table-header">User</th>
+              <th class="table-header">Role</th>
+              <th class="table-header">Company</th>
+              <th class="table-header">Activity</th>
+              <th class="table-header">Status</th>
+              <th class="table-header">Joined</th>
+              <th class="table-header">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let user of users" class="hover:bg-gray-50">
+              <td class="table-cell">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10">
+                    <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+                      <span class="text-sm font-medium text-primary-600">
+                        {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">
+                      {{ user.firstName }} {{ user.lastName }}
+                    </div>
+                    <div class="text-sm text-gray-500">{{ user.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="table-cell">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" [class]="getRoleClass(user.role)">
+                  {{ user.role | titlecase }}
+                </span>
+              </td>
+              <td class="table-cell">
+                <div class="text-sm text-gray-900">{{ user.company || 'N/A' }}</div>
+                <div class="text-sm text-gray-500" *ngIf="user.phone">{{ user.phone }}</div>
+              </td>
+              <td class="table-cell">
+                <div class="text-sm text-gray-900">{{ user.listingsCount || 0 }} listings</div>
+                <div class="text-sm text-gray-500">{{ user.campaignsCount || 0 }} campaigns</div>
+              </td>
+              <td class="table-cell">
+                <span class="status-badge" [class.status-active]="user.isActive" [class.status-inactive]="!user.isActive">
+                  {{ user.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="table-cell">
+                <div class="text-sm text-gray-900">{{ user.createdAt | date:'short' }}</div>
+                <div class="text-sm text-gray-500" *ngIf="user.lastLoginAt">
+                  Last login: {{ user.lastLoginAt | date:'short' }}
+                </div>
+              </td>
+              <td class="table-cell">
+                <div class="flex items-center space-x-2">
+                  <button class="text-primary-600 hover:text-primary-900 text-sm font-medium">
+                    Edit
+                  </button>
+                  <button 
+                    class="text-danger-600 hover:text-danger-900 text-sm font-medium"
+                    (click)="deleteUser(user.id!)"
+                    *ngIf="user.role !== 'admin'"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 flex justify-between sm:hidden">
+            <button class="btn-secondary" [disabled]="currentPage === 1">Previous</button>
+            <button class="btn-secondary" [disabled]="currentPage === totalPages">Next</button>
+          </div>
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Showing {{ (currentPage - 1) * 10 + 1 }} to {{ Math.min(currentPage * 10, totalItems) }} of {{ totalItems }} results
+              </p>
+            </div>
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                <button 
+                  class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                  [disabled]="currentPage === 1"
+                >
+                  Previous
+                </button>
+                <button 
+                  class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                  [disabled]="currentPage === totalPages"
+                >
+                  Next
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

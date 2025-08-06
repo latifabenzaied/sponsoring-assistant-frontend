@@ -1,0 +1,323 @@
+<div class="min-h-screen bg-gray-50 py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Breadcrumb -->
+    <nav class="flex mb-6" aria-label="Breadcrumb">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+        <li class="inline-flex items-center">
+          <button 
+            class="text-gray-700 hover:text-primary-600 inline-flex items-center"
+            (click)="goBackToCampaigns()"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+            </svg>
+            Campaigns
+          </button>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="ml-1 text-gray-500 md:ml-2">{{ campaign?.name || 'Campaign' }}</span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Ad Sets</h1>
+          <p class="mt-2 text-gray-600" *ngIf="campaign">
+            Managing ad sets for <span class="font-medium">{{ campaign.name }}</span>
+          </p>
+        </div>
+        <button 
+          class="btn-primary"
+          (click)="openCreateModal()"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Create Ad Set
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <span class="ml-3 text-gray-600">Loading ad sets...</span>
+    </div>
+
+    <!-- Ad Sets Table -->
+    <div *ngIf="!isLoading" class="card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="table-header">Ad Set Name</th>
+              <th class="table-header">Budget</th>
+              <th class="table-header">Start Date</th>
+              <th class="table-header">End Date</th>
+              <th class="table-header">Status</th>
+              <th class="table-header">Meta AdSet ID</th>
+              <th class="table-header">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let adSet of adSets" class="hover:bg-gray-50">
+              <td class="table-cell">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="w-5 h-5 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="text-sm font-medium text-gray-900">{{ adSet.name }}</div>
+                    <div class="text-sm text-gray-500">{{ adSet.optimizationGoal }} • {{ adSet.billingEvent }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="table-cell">
+                <div class="text-sm text-gray-900">€{{ adSet.budget }}/day</div>
+              </td>
+              <td class="table-cell">
+                <div class="text-sm text-gray-900">{{ adSet.startDate | date:'short' }}</div>
+              </td>
+              <td class="table-cell">
+                <div class="text-sm text-gray-900">{{ adSet.endDate | date:'short' }}</div>
+              </td>
+              <td class="table-cell">
+                <span class="status-badge" [class]="getStatusClass(adSet.status)">
+                  {{ adSet.status }}
+                </span>
+              </td>
+              <td class="table-cell">
+                <div class="text-sm text-gray-900 font-mono">{{ adSet.metaAdSetId || 'N/A' }}</div>
+              </td>
+              <td class="table-cell">
+                <div class="flex items-center space-x-2">
+                  <button 
+                    class="text-primary-600 hover:text-primary-900 text-sm font-medium"
+                    (click)="viewAds(adSet.id!)"
+                  >
+                    View Ads
+                  </button>
+                  <button 
+                    class="text-danger-600 hover:text-danger-900 text-sm font-medium"
+                    (click)="deleteAdSet(adSet.id!)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="adSets.length === 0" class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No ad sets</h3>
+        <p class="mt-1 text-sm text-gray-500">Get started by creating your first ad set for this campaign.</p>
+        <div class="mt-6">
+          <button class="btn-primary" (click)="openCreateModal()">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Create Ad Set
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Ad Set Modal -->
+<div *ngIf="showCreateModal" class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeCreateModal()"></div>
+
+    <!-- Modal panel -->
+    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="sm:flex sm:items-start">
+          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-secondary-100 sm:mx-0 sm:h-10 sm:w-10">
+            <svg class="h-6 w-6 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+          </div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Create New Ad Set
+            </h3>
+            
+            <form class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                  <label class="form-label">Ad Set Name</label>
+                  <input 
+                    type="text" 
+                    class="form-input" 
+                    [(ngModel)]="newAdSet.name"
+                    name="adSetName"
+                    placeholder="Enter ad set name"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label class="form-label">Daily Budget (€)</label>
+                  <input 
+                    type="number" 
+                    class="form-input" 
+                    [(ngModel)]="newAdSet.budget"
+                    name="budget"
+                    min="1"
+                    step="1"
+                  />
+                </div>
+
+                <div>
+                  <label class="form-label">Status</label>
+                  <select 
+                    class="form-input" 
+                    [(ngModel)]="newAdSet.status"
+                    name="status"
+                  >
+                    <option [value]="MetaStatus.ACTIVE">Active</option>
+                    <option [value]="MetaStatus.PAUSED">Paused</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="form-label">Start Date</label>
+                  <input 
+                    type="date" 
+                    class="form-input" 
+                    [value]="formatDate(newAdSet.startDate!)"
+                    (change)="onDateChange('startDate', startDateInput.value)"
+                    #startDateInput
+                    name="startDate"
+                  />
+                </div>
+
+                <div>
+                  <label class="form-label">End Date</label>
+                  <input 
+                    type="date" 
+                    class="form-input" 
+                    [value]="formatDate(newAdSet.endDate!)"
+                    (change)="onDateChange('endDate', endDateInput.value)"
+                    #endDateInput
+                    name="endDate"
+                  />
+                </div>
+
+                <div>
+                  <label class="form-label">Billing Event</label>
+                  <select 
+                    class="form-input" 
+                    [(ngModel)]="newAdSet.billingEvent"
+                    name="billingEvent"
+                  >
+                    <option [value]="BillingEvent.IMPRESSIONS">Impressions</option>
+                    <option [value]="BillingEvent.CLICKS">Clicks</option>
+                    <option [value]="BillingEvent.ACTIONS">Actions</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="form-label">Optimization Goal</label>
+                  <select 
+                    class="form-input" 
+                    [(ngModel)]="newAdSet.optimizationGoal"
+                    name="optimizationGoal"
+                  >
+                    <option [value]="OptimizationGoal.REACH">Reach</option>
+                    <option [value]="OptimizationGoal.IMPRESSIONS">Impressions</option>
+                    <option [value]="OptimizationGoal.CLICKS">Clicks</option>
+                    <option [value]="OptimizationGoal.CONVERSIONS">Conversions</option>
+                    <option [value]="OptimizationGoal.ENGAGEMENT">Engagement</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Targeting Section -->
+              <div class="border-t pt-4">
+                <div class="flex items-center justify-between mb-3">
+                  <label class="form-label mb-0">Targeting</label>
+                  <button 
+                    type="button"
+                    class="text-sm text-primary-600 hover:text-primary-800"
+                    (click)="toggleTargetingEditor()"
+                  >
+                    {{ showTargetingEditor ? 'Hide JSON Editor' : 'Show JSON Editor' }}
+                  </button>
+                </div>
+                
+                <div *ngIf="!showTargetingEditor" class="bg-gray-50 p-3 rounded-lg">
+                  <div class="text-sm text-gray-600">
+                    <p><strong>Age:</strong> {{ newAdSet.targeting?.age_min }}-{{ newAdSet.targeting?.age_max }}</p>
+                    <p><strong>Countries:</strong> {{ newAdSet.targeting?.geo_locations?.countries?.join(', ') }}</p>
+                    <p><strong>Interests:</strong> {{ newAdSet.targeting?.interests?.length || 0 }} selected</p>
+                  </div>
+                </div>
+
+                <div *ngIf="showTargetingEditor" class="space-y-2">
+                  <textarea 
+                    class="form-input font-mono text-sm"
+                    rows="8"
+                    [(ngModel)]="targetingJson"
+                    (ngModelChange)="onTargetingJsonChange()"
+                    name="targeting"
+                    placeholder="Enter targeting JSON..."
+                  ></textarea>
+                  <p class="text-xs text-gray-500">
+                    Edit the targeting parameters as JSON. Invalid JSON will be ignored.
+                  </p>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button 
+          type="button" 
+          class="btn-primary sm:ml-3"
+          (click)="createAdSet()"
+          [disabled]="isCreating || !newAdSet.name?.trim()"
+        >
+          <svg 
+            *ngIf="isCreating" 
+            class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" 
+            fill="none" 
+            viewBox="0 0 24 24"
+          >
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ isCreating ? 'Creating...' : 'Create Ad Set' }}
+        </button>
+        <button 
+          type="button" 
+          class="btn-secondary sm:mr-3"
+          (click)="closeCreateModal()"
+          [disabled]="isCreating"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

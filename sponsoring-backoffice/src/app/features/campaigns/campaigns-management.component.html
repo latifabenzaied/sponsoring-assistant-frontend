@@ -1,0 +1,1108 @@
+<div class="min-h-screen bg-gray-50 py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Campaigns</h1>
+          <p class="mt-2 text-gray-600">Manage your Meta advertising campaigns, ad sets, and ads</p>
+        </div>
+        <button 
+          class="btn-primary"
+          (click)="openCreateCampaignModal()"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Create Campaign
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <span class="ml-3 text-gray-600">Loading campaigns...</span>
+    </div>
+
+    <!-- Campaigns Hierarchical View -->
+    <div *ngIf="!isLoading" class="space-y-4">
+      <!-- Campaign Cards -->
+      <div *ngFor="let campaign of campaigns1" class="campaign-card">
+        <!-- Campaign Header -->
+        <div class="campaign-header" (click)="toggleCampaign(campaign)" >
+          <div class="flex items-center flex-1">
+            <div class="campaign-icon">
+              <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+              </svg>
+            </div>
+            
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <div class="flex-1">
+                  <h3 class="text-lg font-semibold text-gray-900 truncate">{{ campaign.name }}</h3>
+                  <div class="flex items-center space-x-4 mt-1">
+                    <span class="objective-badge" [class]="getObjectiveLabel(campaign.objective)">{{ campaign.objective}}</span>
+                    <span class="status-badge" [ngClass]="getStatusClass(campaign.status)">{{ campaign.status }}</span>
+                    <span class="text-sm text-gray-500">ID: {{ campaign.metaCampaignId || 'N/A' }}</span>
+                  </div>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                  <button 
+                    class="action-btn action-btn-primary"
+                    (click)="openCampaignDetails(campaign); $event.stopPropagation()"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    View Details
+                  </button>
+                  <button 
+                    class="action-btn action-btn-primary"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add Ad Set
+                  </button>
+                  <button 
+                    class="action-btn action-btn-danger"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                  </button>
+                  
+                  <div class="expand-icon" [class.expanded]="campaign.isExpanded">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ad Sets (Expandable) -->
+        <div class="adsets-container" [class.expanded]="campaign.isExpanded">
+          <div *ngIf="campaign.isLoadingAdSets" class="loading-state">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
+            <span class="ml-2 text-sm text-gray-600">Loading ad sets...</span>
+          </div>
+
+          <div *ngIf="!campaign.isLoadingAdSets && campaign.adSets && campaign.adSets.length === 0" class="empty-state">
+            <svg class="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+            <p class="text-sm text-gray-500">No ad sets yet</p>
+            <button 
+              class="btn-secondary mt-2"
+            >
+              Create First Ad Set
+            </button>
+          </div>
+
+          <div *ngFor="let adSet of campaign.adSets" class="adset-card">
+            <!-- Ad Set Header -->
+            <div class="adset-header" (click)="toggleAdSet(adSet)">
+              <div class="flex items-center flex-1">
+                <div class="adset-icon">
+                  <svg class="w-4 h-4 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                  </svg>
+                </div>
+                
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                      <h4 class="text-md font-medium text-gray-900 truncate">{{ adSet.name }}</h4>
+                      <div class="flex items-center space-x-3 mt-1">
+                        <span class="text-sm text-gray-600">€{{ adSet.dailyBudget}}/day</span>
+                        <span class="status-badge" [class]="getStatusClass(adSet.status)">{{ adSet.status }}</span>
+                        <span class="text-xs text-gray-500">{{ adSet.startTime | date:'short' }} - {{ adSet.endTime | date:'short' }} </span>
+                      </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2">
+                      <button 
+                        class="action-btn action-btn-primary"
+                        (click)="openAdSetDetails(adSet); $event.stopPropagation()"
+                      >
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        Details
+                      </button>
+                      <button 
+                        class="action-btn action-btn-primary"
+                        (click)="openAdSetDetails(adSet); $event.stopPropagation()"
+                      >
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Add Ad
+                      </button>
+                      <button 
+                        class="action-btn action-btn-danger"
+                      >
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      </button>
+                      
+                      <div class="expand-icon">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ads (Expandable) -->
+              <div class="ads-container" [class.expanded]="adSet.isExpanded">
+              <div *ngIf="adSet.isLoadingAds" class="loading-state">
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-secondary-600"></div>
+                <span class="ml-2 text-xs text-gray-600">Loading ads...</span>
+              </div>
+
+              <div *ngIf="!adSet.isLoadingAds && adSet.ads && adSet.ads.length === 0" class="empty-state">
+                <svg class="w-6 h-6 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <p class="text-xs text-gray-500">No ads yet</p>
+                <button 
+                  class="btn-secondary text-xs mt-1"
+                >
+                  Create First Ad
+                </button>
+              </div>
+
+              <div class="ads-grid">
+                <div *ngFor="let ad of adSet.ads" class="ad-card">
+                  <div class="ad-preview">
+                    <div *ngIf="ad.imageUrl" class="ad-image">
+                      <img [src]="ad.imageUrl" [alt]="ad.name" class="w-full h-full object-cover">
+                    </div>
+                    <div *ngIf="!ad.imageUrl" class="ad-image-placeholder">
+                      <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  <div class="ad-content" *ngIf="ad.creativePreview">
+                    <h5 class="ad-title">{{ ad.name }}</h5>
+                    <p class="ad-name">{{ ad.creativePreview.message }}</p>
+                    <div class="ad-meta">
+                      <span class="status-badge" [class]="getStatusClass(ad.status)">{{ ad.status }}</span>
+                      <span class="ad-id">{{ ad.metaAdId || 'N/A' }}</span>
+                    </div>
+                  </div>
+                  
+                  <div class="ad-actions">
+                    <button 
+                      class="action-btn action-btn-primary mr-1"
+                      (click)="openAdDetails(ad)"
+                    >
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      </svg>
+                    </button>
+                    <button 
+                      class="action-btn action-btn-danger"
+                    >
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State for Campaigns -->
+      <div *ngIf="campaigns1.length === 0" class="empty-campaigns-state">
+        <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No campaigns yet</h3>
+        <p class="text-gray-500 mb-6">Get started by creating your first advertising campaign.</p>
+        <button class="btn-primary" (click)="openCreateCampaignModal()">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Create Your First Campaign
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Campaign Details Side Panel -->
+<div *ngIf="showCampaignDetails" class="fixed inset-0 z-50 overflow-hidden">
+  <div class="absolute inset-0 overflow-hidden">
+    <!-- Background overlay -->
+    <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" ></div>
+    
+    <!-- Panel -->
+    <section class="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+      <div class="w-screen max-w-2xl">
+        <div class="h-full flex flex-col bg-white shadow-xl overflow-y-scroll">
+          <!-- Header -->
+          <div class="px-4 py-6 bg-primary-50 sm:px-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-medium text-gray-900">Campaign Details</h2>
+              <button 
+                class="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                (click)="closeCampaignDetails()"
+              >
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="flex-1 px-4 py-6 sm:px-6"  *ngIf="selectedCampaignForDetails" >
+            <!-- Basic Info -->
+            <div class="card p-6 mb-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Campaign Name</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ selectedCampaignForDetails.name}}</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Status</label>
+                  <p class="mt-1">
+                    <span class="status-badge"  [class]="getStatusClass(selectedCampaignForDetails.status)">
+                        {{ selectedCampaignForDetails.status }}
+                    </span>
+                  </p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Objective</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ getObjectiveLabel(selectedCampaignForDetails.objective) }}</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Meta Campaign ID</label>
+                  <p class="mt-1 text-sm text-gray-900 font-mono">{{ selectedCampaignForDetails.metaCampaignId || 'N/A' }}</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Created Date</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ selectedCampaignForDetails.createdAt | date:'medium' }}</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Last Updated</label>
+                  <p class="mt-1 text-sm text-gray-900"></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="card p-6 mb-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Performance Summary</h3>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-primary-600">12345</div>
+                  <div class="text-sm text-gray-500">Total Reach</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-success-600">1.789€</div>
+                  <div class="text-sm text-gray-500">Total Spend</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-secondary-600">2222</div>
+                  <div class="text-sm text-gray-500">Impressions</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-warning-600">2222</div>
+                  <div class="text-sm text-gray-500">Total Clicks</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Associated Ad Sets -->
+            <div class="card p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Associated Ad Sets ({{ selectedCampaignForDetails.adSets?.length || 0 }})</h3>
+              <div *ngIf="selectedCampaignForDetails.adSets && selectedCampaignForDetails.adSets.length > 0" class="space-y-3">
+                <div *ngFor="let adSet of selectedCampaignForDetails.adSets" class="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                      <h4 class="text-sm font-medium text-gray-900">{{ adSet.name }}</h4>
+                      <div class="flex items-center space-x-4 mt-1">
+                        <span class="text-xs text-gray-500">€{{ adSet.dailyBudget }}/day</span>
+                        <span class="status-badge text-xs" [class]="getStatusClass(adSet.status)">{{ adSet.status }}</span>
+                        <span class="text-xs text-gray-500">{{ adSet.ads?.length || 0 }} ads</span>
+                      </div>
+                    </div>
+                    <button 
+                      class="text-primary-600 hover:text-primary-800 text-sm font-medium"
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="!selectedCampaignForDetails.adSets || selectedCampaignForDetails.adSets.length === 0" class="text-center py-8">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No ad sets</h3>
+                <p class="mt-1 text-sm text-gray-500">This campaign doesn't have any ad sets yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Ad Set Details Side Panel -->
+<div *ngIf="showAdSetDetails" class="fixed inset-0 z-50 overflow-hidden">
+  <div class="absolute inset-0 overflow-hidden">
+    <!-- Background overlay -->
+    <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeAdSetDetails()"></div>
+    
+    <!-- Panel -->
+    <section class="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+      <div class="w-screen max-w-2xl">
+        <div class="h-full flex flex-col bg-white shadow-xl overflow-y-scroll">
+          <!-- Header -->
+          <div class="px-4 py-6 bg-secondary-50 sm:px-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-medium text-gray-900">Ad Set Details</h2>
+              <button 
+                class="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-secondary-500"
+                (click)="closeAdSetDetails()"
+              >
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="flex-1 px-4 py-6 sm:px-6" *ngIf="selectedAdSetForDetails">
+            <!-- Basic Info -->
+            <div class="card p-6 mb-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Ad Set Name</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ selectedAdSetForDetails.name }}</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Status</label>
+                  <p class="mt-1">
+                    <span class="status-badge" [class]="getStatusClass(selectedAdSetForDetails.status)">
+                      {{ selectedAdSetForDetails.status }}
+                    </span>
+                  </p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Daily Budget</label>
+                  <p class="mt-1 text-sm text-gray-900">€{{ selectedAdSetForDetails.dailyBudget }}</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Meta AdSet ID</label>
+                  <p class="mt-1 text-sm text-gray-900 font-mono">{{ selectedAdSetForDetails.metaAdSetId || 'N/A' }}</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Start Date</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ selectedAdSetForDetails.startTime | date:'medium' }}</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">End Date</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ selectedAdSetForDetails.endTime | date:'medium' }}</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Billing Event</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ selectedAdSetForDetails.billingEvent }}</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Optimization Goal</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ selectedAdSetForDetails.optimizationGoal }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="card p-6 mb-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Performance Summary</h3>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-primary-600">reach</div>
+                  <div class="text-sm text-gray-500">Reach</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-warning-600">clicks</div>
+                  <div class="text-sm text-gray-500">Clicks</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-secondary-600">clicks</div>
+                  <div class="text-sm text-gray-500">CTR</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-success-600">€spend</div>
+                  <div class="text-sm text-gray-500">Spend</div>
+                </div>
+              </div>
+            </div>
+
+           <!--  Targeting Parameters
+            <div class="card p-6 mb-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Targeting Parameters</h3>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <pre class="text-sm text-gray-800 whitespace-pre-wrap font-mono">{{ selectedAdSetForDetails.targeting | json }}</pre>
+              </div>
+            </div>-->
+
+            <!-- Associated Ads -->
+            <div class="card p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Associated Ads ({{ selectedAdSetForDetails.ads?.length || 0 }})</h3>
+              <div *ngIf="selectedAdSetForDetails.ads && selectedAdSetForDetails.ads.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div *ngFor="let ad of selectedAdSetForDetails.ads" class="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <div class="flex items-start space-x-3">
+                    <div *ngIf="ad.imageUrl" class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                      <img [src]="ad.imageUrl" [alt]="ad.title" class="w-full h-full object-cover">
+                    </div>
+                    <div *ngIf="!ad.imageUrl" class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h4 class="text-sm font-medium text-gray-900 truncate">{{ ad.title }}</h4>
+                      <p class="text-xs text-gray-500 truncate">{{ ad.name }}</p>
+                      <div class="flex items-center justify-between mt-2">
+                        <span class="status-badge text-xs" [class]="getStatusClass(ad.status)">{{ ad.status }}</span>
+                        <div class="flex items-center space-x-2">
+                          <button 
+                            class="action-btn action-btn-primary"
+                            (click)="openAdDetails(ad)"
+                          >
+                            View Details
+                          </button>
+                          <button 
+                            *ngIf="ad.listingId"
+                            class="action-btn action-btn-primary"
+                            (click)="viewLinkedListing(ad)"
+                          >
+                            View Listing
+                          </button>
+                          <button 
+                            class="action-btn action-btn-danger"
+                          >
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="!selectedAdSetForDetails.ads || selectedAdSetForDetails.ads.length === 0" class="text-center py-8">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No ads</h3>
+                <p class="mt-1 text-sm text-gray-500">This ad set doesn't have any ads yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Ad Details Side Panel -->
+<div *ngIf="showAdDetails" class="fixed inset-0 z-50 overflow-hidden">
+  <div class="absolute inset-0 overflow-hidden">
+    <!-- Background overlay -->
+    <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeAdDetails()"></div>
+    
+    <!-- Panel -->
+    <section class="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+      <div class="w-screen max-w-2xl">
+        <div class="h-full flex flex-col bg-white shadow-xl overflow-y-scroll">
+          <!-- Header -->
+          <div class="px-4 py-6 bg-warning-50 sm:px-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-medium text-gray-900">Ad Details</h2>
+              <button 
+                class="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-warning-500"
+                (click)="closeAdDetails()"
+              >
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="flex-1 px-4 py-6 sm:px-6" *ngIf="selectedAdForDetails">
+            <!-- Ad Preview -->
+            <div class="card p-6 mb-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Ad Preview</h3>
+              <div class="max-w-sm mx-auto bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div *ngIf="selectedAdForDetails.imageUrl" class="w-full h-64 overflow-hidden">
+                  <img [src]="selectedAdForDetails.imageUrl" [alt]="selectedAdForDetails.name" class="w-full h-full object-cover">
+                </div>
+                <div *ngIf="!selectedAdForDetails.imageUrl" class="w-full h-64 bg-gray-100 flex items-center justify-center">
+                  <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+                <div class="p-4">
+                  <h4 class="font-semibold text-gray-900 mb-2">{{ selectedAdForDetails.name }}</h4>
+                  <p class="text-sm text-gray-600 mb-3" *ngIf="selectedAdForDetails.creativePreview">{{ selectedAdForDetails.creativePreview.message }}</p>
+                  <div class="flex items-center justify-between pt-3 border-t border-gray-200">
+                    <span class="text-xs text-gray-500">Sponsored</span>
+                    <button class="text-xs text-primary-600 font-medium">Learn More</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Basic Info -->
+          <div class="card p-6 mb-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Ad Name</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ selectedAdForDetails.name }}</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Status</label>
+                  <p class="mt-1">
+                    <span class="status-badge" [class]="getStatusClass(selectedAdForDetails.status)">
+                      {{ selectedAdForDetails.status }}
+                    </span>
+                  </p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Meta Ad ID</label>
+                  <p class="mt-1 text-sm text-gray-900 font-mono">{{ selectedAdForDetails.metaAdId || 'N/A' }}</p>
+                </div>
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Creative ID</label>
+                  <p class="mt-1 text-sm text-gray-900 font-mono">{{ selectedAdForDetails.creativeId || 'N/A' }}</p>
+                </div>
+              <!--  <div>
+                  <label class="text-sm font-medium text-gray-500">Post ID</label>
+                  <p class="mt-1 text-sm text-gray-900 font-mono">{{ selectedAdForDetails.postId || 'N/A' }}</p>
+                </div>-->
+<!--                <div>
+                  <label class="text-sm font-medium text-gray-500">Image Hash</label>
+                  <p class="mt-1 text-sm text-gray-900 font-mono">{{ selectedAdForDetails.imageHash || 'N/A' }}</p>
+                </div>-->
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Created Date</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ selectedAdForDetails.createdAt | date:'medium' }}</p>
+                </div>
+<!--                <div>
+                  <label class="text-sm font-medium text-gray-500">Last Updated</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ selectedAdForDetails.updatedAt | date:'medium' }}</p>
+                </div>-->
+              </div>
+            </div>
+
+            <!-- Creative Content -->
+            <div class="card p-6 mb-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Creative Content</h3>
+              <div class="space-y-4">
+                <div>
+                  <label class="text-sm font-medium text-gray-500">Title</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ selectedAdForDetails.name || 'N/A' }}</p>
+                </div>
+                <div *ngIf="selectedAdForDetails.creativePreview">
+                  <label class="text-sm font-medium text-gray-500">Description</label>
+                  <p class="mt-1 text-sm text-gray-900">{{ selectedAdForDetails.creativePreview.message }}</p>
+                </div>
+                <div *ngIf="selectedAdForDetails.imageUrl">
+                  <label class="text-sm font-medium text-gray-500">Image URL</label>
+                  <p class="mt-1 text-sm text-gray-900 break-all">
+                    <a [href]="selectedAdForDetails.imageUrl" target="_blank" class="text-primary-600 hover:text-primary-800">
+                      {{ selectedAdForDetails.imageUrl }}
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="card p-6 mb-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Engagement Metrics</h3>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-primary-600">{{ getAdMetrics(selectedAdForDetails).reach | number }}</div>
+                  <div class="text-sm text-gray-500">Reach</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-warning-600">{{ getAdMetrics(selectedAdForDetails).clicks | number }}</div>
+                  <div class="text-sm text-gray-500">Clicks</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-secondary-600">{{ getAdMetrics(selectedAdForDetails).reactions | number }}</div>
+                  <div class="text-sm text-gray-500">Reactions</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-success-600">{{ getAdMetrics(selectedAdForDetails).shares | number }}</div>
+                  <div class="text-sm text-gray-500">Shares</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Linked Listing Preview -->
+            <div *ngIf="getLinkedListingPreview(selectedAdForDetails)" class="border-t border-gray-200 pt-6">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4">Linked Listing</h4>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-start space-x-4" *ngIf="getLinkedListingPreview(selectedAdForDetails) as listing">
+                  <div class="flex-shrink-0">
+                    <img 
+                      [src]="getImageUrl(listing.photoUrls[0])"
+                      [alt]="listing.title"
+                      class="w-20 h-20 rounded-lg object-cover"
+                    />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h5 class="text-sm font-semibold text-gray-900 truncate">{{ listing.title }}</h5>
+                    <p class="text-sm text-gray-600 mt-1">{{ listing.location }}</p>
+                    <div class="flex items-center space-x-4 mt-2">
+                      <span class="text-sm font-medium text-primary-600">€{{ listing.price | number }}</span>
+                      <span class="text-sm text-gray-500">{{ listing.area }}m²</span>
+                      <span class="text-sm text-gray-500">{{ listing.bedRoomsNb }} bed</span>
+                    </div>
+                    <div class="mt-3">
+                      <button 
+                        class="text-sm text-primary-600 hover:text-primary-800 font-medium"
+                        (click)="viewLinkedListing(selectedAdForDetails!)"
+                      >
+                        View Full Details →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Create Campaign Modal -->
+<!--<div *ngIf="showCreateCampaignModal" class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeCreateCampaignModal()"></div>
+    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="sm:flex sm:items-start">
+          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-primary-100 sm:mx-0 sm:h-10 sm:w-10">
+            <svg class="h-6 w-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+          </div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Create New Campaign</h3>
+            <form class="space-y-4">
+              <div>
+                <label class="form-label">Campaign Name</label>
+                <input type="text" class="form-input" [(ngModel)]="newCampaign.name" name="campaignName" placeholder="Enter campaign name" required />
+              </div>
+              <div>
+                <label class="form-label">Objective</label>
+                <select class="form-input" [(ngModel)]="newCampaign.objective" name="objective">
+                  <option [value]="CampaignObjective.AWARENESS">Brand Awareness</option>
+                  <option [value]="CampaignObjective.TRAFFIC">Traffic</option>
+                  <option [value]="CampaignObjective.ENGAGEMENT">Engagement</option>
+                  <option [value]="CampaignObjective.LEADS">Lead Generation</option>
+                  <option [value]="CampaignObjective.APP_PROMOTION">App Promotion</option>
+                  <option [value]="CampaignObjective.SALES">Sales</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Status</label>
+                <select class="form-input" [(ngModel)]="newCampaign.status" name="status">
+                  <option [value]="MetaStatus.ACTIVE">Active</option>
+                  <option [value]="MetaStatus.PAUSED">Paused</option>
+                </select>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button class="btn-primary w-full sm:w-auto sm:ml-3" (click)="createCampaign()" [disabled]="isCreating">
+          <svg *ngIf="isCreating" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ isCreating ? 'Creating...' : 'Create Campaign' }}
+        </button>
+        <button class="btn-secondary w-full sm:w-auto mt-3 sm:mt-0" (click)="closeCreateCampaignModal()" [disabled]="isCreating">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>-->
+
+<!-- Create Ad Set Modal -->
+<!--
+<div *ngIf="showCreateAdSetModal" class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeCreateAdSetModal()"></div>
+    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="sm:flex sm:items-start">
+          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-secondary-100 sm:mx-0 sm:h-10 sm:w-10">
+            <svg class="h-6 w-6 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+          </div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Create New Ad Set</h3>
+            <form class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                  <label class="form-label">Ad Set Name</label>
+                  <input type="text" class="form-input" [(ngModel)]="newAdSet.name" name="adSetName" placeholder="Enter ad set name" required />
+                </div>
+                <div>
+                  <label class="form-label">Daily Budget (€)</label>
+                  <input type="number" class="form-input" [(ngModel)]="newAdSet.budget" name="budget" min="1" step="1" />
+                </div>
+                <div>
+                  <label class="form-label">Status</label>
+                  <select class="form-input" [(ngModel)]="newAdSet.status" name="status">
+                    <option [value]="MetaStatus.ACTIVE">Active</option>
+                    <option [value]="MetaStatus.PAUSED">Paused</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Start Date</label>
+                  <input type="date" class="form-input" [value]="formatDate(newAdSet.startDate!)" (change)="onDateChange('startDate', startDateInput.value)" #startDateInput name="startDate" />
+                </div>
+                <div>
+                  <label class="form-label">End Date</label>
+                  <input type="date" class="form-input" [value]="formatDate(newAdSet.endDate!)" (change)="onDateChange('endDate', endDateInput.value)" #endDateInput name="endDate" />
+                </div>
+                <div>
+                  <label class="form-label">Billing Event</label>
+                  <select class="form-input" [(ngModel)]="newAdSet.billingEvent" name="billingEvent">
+                    <option [value]="BillingEvent.IMPRESSIONS">Impressions</option>
+                    <option [value]="BillingEvent.CLICKS">Clicks</option>
+                    <option [value]="BillingEvent.ACTIONS">Actions</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Optimization Goal</label>
+                  <select class="form-input" [(ngModel)]="newAdSet.optimizationGoal" name="optimizationGoal">
+                    <option [value]="OptimizationGoal.REACH">Reach</option>
+                    <option [value]="OptimizationGoal.IMPRESSIONS">Impressions</option>
+                    <option [value]="OptimizationGoal.CLICKS">Clicks</option>
+                    <option [value]="OptimizationGoal.CONVERSIONS">Conversions</option>
+                    <option [value]="OptimizationGoal.ENGAGEMENT">Engagement</option>
+                  </select>
+                </div>
+              </div>
+              <div class="border-t pt-4">
+                <div class="flex items-center justify-between mb-3">
+                  <label class="form-label mb-0">Targeting</label>
+                  <button type="button" class="text-sm text-primary-600 hover:text-primary-800" (click)="toggleTargetingEditor()">
+                    {{ showTargetingEditor ? 'Hide JSON Editor' : 'Show JSON Editor' }}
+                  </button>
+                </div>
+                <div *ngIf="!showTargetingEditor" class="bg-gray-50 p-3 rounded-lg">
+                  <div class="text-sm text-gray-600">
+                    <p><strong>Age:</strong> {{ newAdSet.targeting?.age_min }}-{{ newAdSet.targeting?.age_max }}</p>
+                    <p><strong>Countries:</strong> {{ newAdSet.targeting?.geo_locations?.countries?.join(', ') }}</p>
+                    <p><strong>Interests:</strong> {{ newAdSet.targeting?.interests?.length || 0 }} selected</p>
+                  </div>
+                </div>
+                <div *ngIf="showTargetingEditor" class="space-y-2">
+                  <textarea class="form-input font-mono text-sm" rows="8" [(ngModel)]="targetingJson" (ngModelChange)="onTargetingJsonChange()" name="targeting" placeholder="Enter targeting JSON..."></textarea>
+                  <p class="text-xs text-gray-500">Edit the targeting parameters as JSON. Invalid JSON will be ignored.</p>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button class="btn-primary sm:ml-3" (click)="createAdSet()" [disabled]="isCreating || !newAdSet.name?.trim()">
+          <svg *ngIf="isCreating" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ isCreating ? 'Creating...' : 'Create Ad Set' }}
+        </button>
+        <button class="btn-secondary sm:mr-3" (click)="closeCreateAdSetModal()" [disabled]="isCreating">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+-->
+
+<!-- Create Ad Modal -->
+<div *ngIf="showCreateAdModal" class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeCreateAdModal()"></div>
+    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="sm:flex sm:items-start">
+          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-warning-100 sm:mx-0 sm:h-10 sm:w-10">
+            <svg class="h-6 w-6 text-warning-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+          </div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Create New Ad</h3>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <div>
+                  <label class="form-label">Ad Name</label>
+                  <input type="text" class="form-input" [(ngModel)]="newAd.name" name="adName" placeholder="Enter ad name" required />
+                </div>
+                <div>
+                  <label class="form-label">Title</label>
+                  <input type="text" class="form-input" [(ngModel)]="newAd.title" name="title" placeholder="Enter ad title" required />
+                </div>
+                <div>
+                  <label class="form-label">Description (Optional)</label>
+                  <textarea class="form-input" rows="3" [(ngModel)]="newAd.description" name="description" placeholder="Enter ad description"></textarea>
+                </div>
+                <div>
+                  <label class="form-label">Image</label>
+                  <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+                    <div class="space-y-1 text-center">
+                      <div *ngIf="!imagePreview">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                          <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="flex text-sm text-gray-600">
+                          <label class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500">
+                            <span>Upload a file</span>
+                            <input type="file" class="sr-only" accept="image/*" (change)="onImageSelected($event)">
+                          </label>
+                          <p class="pl-1">or drag and drop</p>
+                        </div>
+                        <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                      </div>
+                      <div *ngIf="imagePreview" class="relative">
+                        <img [src]="imagePreview" alt="Preview" class="mx-auto h-32 w-32 object-cover rounded-lg">
+                        <button type="button" class="absolute top-0 right-0 -mt-2 -mr-2 bg-red-100 rounded-full p-1 text-red-600 hover:bg-red-200" (click)="selectedImage = null; imagePreview = null">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="space-y-4">
+                <h4 class="text-md font-medium text-gray-900">Live Preview</h4>
+                <div class="border rounded-lg p-4 bg-gray-50">
+                  <div class="bg-white rounded-lg shadow-sm p-4 max-w-sm">
+                    <div *ngIf="imagePreview" class="mb-3">
+                      <img [src]="imagePreview" alt="Ad preview" class="w-full h-48 object-cover rounded-lg">
+                    </div>
+                    <div *ngIf="!imagePreview" class="mb-3 h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                      <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+                    <div class="space-y-2">
+                      <h5 class="font-semibold text-gray-900">{{ newAd.title || 'Your ad title will appear here' }}</h5>
+                      <p class="text-sm text-gray-600" *ngIf="newAd.description">{{ newAd.description }}</p>
+                      <div class="flex items-center justify-between pt-2 border-t">
+                        <span class="text-xs text-gray-500">Sponsored</span>
+                        <button class="text-xs text-primary-600 font-medium">Learn More</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button class="btn-primary sm:ml-3" [disabled]="isCreating || !newAd.name?.trim() || !newAd.title?.trim()">
+          <svg *ngIf="isCreating" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ isCreating ? 'Creating...' : 'Create Ad' }}
+        </button>
+        <button class="btn-secondary sm:mr-3" (click)="closeCreateAdModal()" [disabled]="isCreating">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Linked Listing Modal -->
+<div *ngIf="showLinkedListingModal && linkedListing" class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeLinkedListingModal()"></div>
+
+    <!-- Modal panel -->
+    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="flex items-start justify-between mb-6">
+          <div class="flex items-center">
+            <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
+              <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900">Linked Listing Details</h3>
+              <p class="text-sm text-gray-500">Property being promoted by this ad</p>
+            </div>
+          </div>
+          <button 
+            class="text-gray-400 hover:text-gray-600 transition-colors"
+            (click)="closeLinkedListingModal()"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Property Image -->
+          <div>
+            <div class="aspect-w-16 aspect-h-12 rounded-lg overflow-hidden">
+              <img 
+                [src]="getImageUrl(linkedListing.photoUrls[0])"
+                [alt]="linkedListing.title"
+                class="w-full h-64 object-cover rounded-lg"
+              />
+            </div>
+          </div>
+
+          <!-- Property Details -->
+          <div class="space-y-6">
+            <!-- Basic Info -->
+            <div>
+              <h4 class="text-xl font-bold text-gray-900 mb-2">{{ linkedListing.title }}</h4>
+              <p class="text-gray-600 mb-4">{{ linkedListing.description }}</p>
+              
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <span class="text-sm text-gray-500">Price</span>
+                  <p class="text-lg font-semibold text-primary-600">€{{ linkedListing.price | number }}</p>
+                </div>
+                <div>
+                  <span class="text-sm text-gray-500">Area</span>
+                  <p class="text-lg font-semibold text-gray-900">{{ linkedListing.area }}m²</p>
+                </div>
+                <div>
+                  <span class="text-sm text-gray-500">Type</span>
+                  <p class="text-sm font-medium text-gray-900">{{ linkedListing.propertyType }}</p>
+                </div>
+                <div>
+                  <span class="text-sm text-gray-500">Status</span>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-100 text-success-800">
+                    {{ linkedListing.status | titlecase }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Property Features -->
+            <div>
+              <h5 class="text-sm font-medium text-gray-900 mb-3">Property Features</h5>
+              <div class="grid grid-cols-3 gap-4">
+                <div class="text-center" *ngIf="linkedListing.bedRoomsNb">
+                  <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-1">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-gray-600">{{ linkedListing.bedRoomsNb }} Bedrooms</span>
+                </div>
+                <div class="text-center" *ngIf="linkedListing.bathRoomsNb">
+                  <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-1">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-gray-600">{{ linkedListing.bathRoomsNb }} Bathrooms</span>
+                </div>
+                <div class="text-center" *ngIf="linkedListing.furnished !== undefined">
+                  <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-1">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-gray-600">{{ linkedListing.furnished ? 'Furnished' : 'Unfurnished' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Location -->
+            <div>
+              <h5 class="text-sm font-medium text-gray-900 mb-2">Location</h5>
+              <div class="flex items-center text-sm text-gray-600">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                {{ linkedListing.location }}
+              </div>
+            </div>
+
+            <!-- Availability -->
+            <div>
+              <h5 class="text-sm font-medium text-gray-900 mb-2">Availability</h5>
+              <p class="text-sm text-gray-600">{{ linkedListing.availability }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button 
+          type="button" 
+          class="btn-primary sm:ml-3"
+          (click)="closeLinkedListingModal()"
+        >
+          Close
+        </button>
+        <a 
+          href="#" 
+          class="btn-secondary sm:mr-3"
+          target="_blank"
+        >
+          View on Website
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

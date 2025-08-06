@@ -1,0 +1,30 @@
+/* Layout component styles */
+
+/* Smooth transitions for mobile sidebar */
+.transform {
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Active navigation item styling */
+.border-r-2 {
+  border-right-width: 2px;
+}
+
+/* Hover effects for navigation items */
+.group:hover .text-gray-500 {
+  color: #6b7280;
+}
+
+/* Mobile overlay backdrop */
+.bg-opacity-50 {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Ensure proper z-index stacking */
+.z-40 {
+  z-index: 40;
+}
+
+.z-50 {
+  z-index: 50;
+}
