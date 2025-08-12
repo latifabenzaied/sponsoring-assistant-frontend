@@ -18,7 +18,7 @@ export class UtlityService {
 
         const fileName = imagePath.split('/').pop();
         return this.http.get(`${this.baseUrl}/images/${fileName}`, {
-            responseType: 'text' // car l’API retourne une URL
+            responseType: 'text'
         });
     }
 }

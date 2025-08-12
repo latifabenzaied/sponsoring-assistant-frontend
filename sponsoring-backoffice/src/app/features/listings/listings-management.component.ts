@@ -8,7 +8,8 @@ import { RealEstateListing, PaginatedResponse, StatusAnnonce, ListingType } from
 import { MetaAd, MetaCampaign, MetaAdSet, MetaStatus, CreateAdRequest } from '../../core/models/meta-ads.interface';
 import {SitePostService} from "../../core/services/SitePostService";
 import {SitePost} from "../../core/models/SitePost";
-import { HttpClientModule } from '@angular/common/http'; // Ajout important
+import { HttpClientModule } from '@angular/common/http';
+import {UtlityService} from "../../core/services/UtlityService"; // Ajout important
 
 @Component({
   selector: 'app-listings-management',
@@ -66,13 +67,13 @@ export class ListingsManagementComponent implements OnInit {
   };
 
   Math = Math;
-  MetaStatus = MetaStatus;
 
   constructor(
     private adminDataService: AdminDataService,
     private metaAdsService: MetaAdsService,
     private router: Router,
-    private sitePostService: SitePostService
+    private sitePostService: SitePostService,
+    private utilityService:UtlityService,
   ) {}
 
   ngOnInit() {
@@ -159,7 +160,7 @@ export class ListingsManagementComponent implements OnInit {
   }
 
 
-  getImageUrl(imageName: any): string {
+ /* getImageUrl(imageName: any): string {
 
     if (!imageName) {
       return 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=500&h=300&fit=crop\'';
@@ -167,6 +168,15 @@ export class ListingsManagementComponent implements OnInit {
     const fileName = imageName.split('/').pop();
 
     return `${this.baseUrl}/images/${fileName}`;
+  }*/
+  getImageUrl(imageName: any): string {
+    console.log(imageName);
+    this.utilityService.getImageUrl(imageName).subscribe(url => {
+      console.log('Image URL reçue :', url);
+      return url;
+      // ici tu peux assigner à une variable pour l'utiliser dans le template
+    });
+    return '';
   }
 
   applyFilters() {
